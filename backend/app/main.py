@@ -4,7 +4,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
+import asyncio
+
 from .db import init_indexes
+from . import scheduler
+from .push import router as push_router
 from .realtime import router as ws_router
 from .routes import router
 from .routes_planner import router as planner_router
@@ -18,7 +22,11 @@ from .routes_fun import router as fun_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_indexes()
-    yield
+    task = asyncio.create_task(scheduler.loop())
+    try:
+        yield
+    finally:
+        task.cancel()
 
 
 app = FastAPI(title="NoiDue", lifespan=lifespan)
@@ -36,6 +44,7 @@ app.include_router(money_router)
 app.include_router(private_router)
 app.include_router(fun_router)
 app.include_router(ws_router)
+app.include_router(push_router)
 
 
 @app.get("/health")

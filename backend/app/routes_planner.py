@@ -36,19 +36,25 @@ async def ctx(user: dict = Depends(current_user)) -> dict:
     return {"user": user, "couple": couple, "cid": couple["_id"], "partner_id": partner_id}
 
 
-async def notify(c: dict, ntype: str, text: str, link: str | None = None):
-    """Notifica in-app al partner, rispettando le sue preferenze."""
-    pid = c["partner_id"]
-    if not pid:
-        return
-    partner = await get_db().users.find_one({"_id": pid})
-    prefs = (partner or {}).get("notifications") or {}
-    if prefs.get("master") is False or (prefs.get("types") or {}).get(ntype) is False:
-        return
-    doc = {"_id": new_id(), "couple_id": c["cid"], "to": pid, "from": c["user"]["_id"], "type": ntype,
+async def notify_to(cid: str, to: str, from_: str | None, ntype: str, text: str, link: str | None = None) -> bool:
+    """Notifica in-app + push a un utente, rispettando le sue preferenze."""
+    user = await get_db().users.find_one({"_id": to})
+    prefs = (user or {}).get("notifications") or {}
+    if not user or prefs.get("master") is False or (prefs.get("types") or {}).get(ntype) is False:
+        return False
+    doc = {"_id": new_id(), "couple_id": cid, "to": to, "from": from_, "type": ntype,
            "text": text, "link": link, "read": False, "created_at": now()}
     await get_db().notifications.insert_one(doc)
-    await emit(c["cid"], "notifications", "new", doc["_id"], c["user"]["_id"], only_user=pid)
+    await emit(cid, "notifications", "new", doc["_id"], from_, only_user=to)
+    from .push import push_user  # import tardivo: push.py usa questo modulo
+    await push_user(to, "NoiDue", text, link or "/", tag=ntype)
+    return True
+
+
+async def notify(c: dict, ntype: str, text: str, link: str | None = None):
+    """Notifica al partner di chi sta agendo."""
+    if c["partner_id"]:
+        await notify_to(c["cid"], c["partner_id"], c["user"]["_id"], ntype, text, link)
 
 
 async def changed(c: dict, entity: str, op: str, id: str):

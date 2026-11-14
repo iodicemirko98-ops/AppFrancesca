@@ -6,6 +6,7 @@ bcrypt>=4.2
 pydantic-settings>=2.5
 email-validator>=2.2
 cryptography>=43
+pywebpush>=2.0
 tzdata
 # solo per i test
 pytest>=8.0

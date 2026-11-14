@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field, field_validator
 from . import logic
 from .db import get_db
 from .realtime import emit
-from .routes_planner import changed, clean, ctx, get_owned, new_id, notify, now, soft_delete
+from .routes_planner import changed, clean, ctx, get_owned, new_id, notify, notify_to, now, soft_delete
 
 router = APIRouter(prefix="/api")
 
@@ -277,13 +277,7 @@ async def release_capsules(c: dict):
                                   "unlock_on": {"$lte": today}}):
         await db.notes.update_one({"_id": n["_id"]}, {"$set": {"released": True}})
         for uid in c["couple"]["members"]:
-            u = await db.users.find_one({"_id": uid})
-            prefs = (u or {}).get("notifications") or {}
-            if prefs.get("master") is False or (prefs.get("types") or {}).get("capsule") is False:
-                continue
-            await db.notifications.insert_one({"_id": new_id(), "couple_id": c["cid"], "to": uid, "from": n["created_by"],
-                "type": "capsule", "text": f"La capsula «{n['title']}» si è aperta! ✉️", "link": "/note", "read": False, "created_at": now()})
-            await emit(c["cid"], "notifications", "new", None, None, only_user=uid)
+            await notify_to(c["cid"], uid, n["created_by"], "capsule", f"La capsula «{n['title']}» si è aperta! ✉️", "/note")
 
 
 @router.get("/notes")
