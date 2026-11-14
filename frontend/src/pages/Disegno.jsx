@@ -76,7 +76,7 @@ function Board({ id, onBack }) {
     const layer = document.createElement('canvas'); layer.width = layer.height = 1200; paint(layer.getContext('2d'), strokes, 1200); x.drawImage(layer, 0, 0)
     c.toBlob((b) => downloadBlob(b, `${(d?.name || 'disegno').replace(/\s+/g, '-')}.png`))
   }
-  if (!d) return <p className="text-mute">Un attimo…</p>
+  if (!d) return <div className="skeleton" aria-busy="true"><i /><i /><i /></div>
   return (
     <div className="space-y-3">
       <PageHeader eyebrow="Disegniamo insieme" title={d.name} action={<button aria-label="Indietro" className="icon-btn-soft" onClick={onBack}><ChevronLeft size={20} /></button>} />
@@ -106,7 +106,7 @@ export default function Disegno() {
   return (
     <div className="space-y-4">
       <PageHeader eyebrow="Una tela per due" title="Disegno condiviso" action={<button aria-label="Nuovo disegno" className="icon-btn" onClick={create}><Plus size={22} /></button>} />
-      {data === null ? <p className="text-mute">Un attimo…</p> : data.length === 0 ? <div className="card text-center text-mute">Nessun disegno. Aprite una tela e disegnate insieme, anche a distanza.</div> : (
+      {data === null ? <div className="skeleton" aria-busy="true"><i /><i /><i /></div> : data.length === 0 ? <div className="card text-center text-mute">Nessun disegno. Aprite una tela e disegnate insieme, anche a distanza.</div> : (
         <div className="grid grid-cols-2 gap-3">{data.map((d) => (
           <div key={d.id} className="card !rounded-2xl !p-2">
             <button className="block aspect-square w-full overflow-hidden rounded-xl bg-white ring-1 ring-line" onClick={() => setOpen(d.id)} aria-label={`Apri ${d.name}`}><Thumb strokes={d.strokes} /></button>

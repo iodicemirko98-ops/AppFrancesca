@@ -24,7 +24,7 @@ export function ListsPage() {
   return (
     <div className="space-y-4">
       <PageHeader eyebrow="Insieme" title="Liste" action={<button aria-label="Nuova lista" className="icon-btn" onClick={() => setOpen(true)}><Plus size={22} /></button>} />
-      {data === null ? <p className="text-mute">Un attimo…</p> : data.length === 0 ? <div className="card text-center text-mute">Nessuna lista ancora.<br />Create la prima: spesa, film da vedere, idee di viaggio…</div> : (
+      {data === null ? <div className="skeleton" aria-busy="true"><i /><i /><i /></div> : data.length === 0 ? <div className="card text-center text-mute">Nessuna lista ancora.<br />Create la prima: spesa, film da vedere, idee di viaggio…</div> : (
         <div className="space-y-2">{data.map((l) => (
           <Link key={l.id} to={`/liste/${l.id}`} className="card flex items-center gap-4 !p-4">
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/15 text-accent"><KIcon kind={l.kind} /></span>
@@ -54,7 +54,7 @@ export function ListDetail() {
   const [renaming, setRenaming] = useState(false)
   const [name, setName] = useState('')
   if (error && !l) return <div className="card text-center"><p className="mb-3 text-mute">Questa lista non c'è più.</p><Link to="/liste" className="btn">Torna alle liste</Link></div>
-  if (!l) return <p className="text-mute">Un attimo…</p>
+  if (!l) return <div className="skeleton" aria-busy="true"><i /><i /><i /></div>
   const add = async (e) => { e.preventDefault(); const t = text.trim(); if (!t) return; setText(''); setData(await api.post(`/lists/${id}/items`, { text: t })) }
   const toggle = async (i) => setData(await api.patch(`/lists/${id}/items/${i.id}`, { done: !i.done }))
   const del = async (i) => setData(await api.del(`/lists/${id}/items/${i.id}`))

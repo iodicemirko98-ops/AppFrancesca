@@ -72,11 +72,11 @@ export default function Cassaforte() {
   }, [open])
   useEffect(() => () => setVaultToken(null), [])
   const copy = async (s) => { try { await navigator.clipboard.writeText(s); showToast('Copiato') } catch { showToast('Impossibile copiare') } }
-  if (!status) return <p className="text-mute">Un attimo…</p>
+  if (!status) return <div className="skeleton" aria-busy="true"><i /><i /><i /></div>
   return (
     <div className="space-y-4">
       <PageHeader eyebrow="Solo per voi due" title="Cassaforte" action={open && <><button aria-label="Blocca" className="icon-btn-soft" onClick={lock}><LockOpen size={19} strokeWidth={1.6} /></button><button aria-label="Nuovo elemento" className="icon-btn" onClick={() => setSheet({})}><Plus size={22} /></button></>} />
-      {!open ? <Pin hasPin={status.has_pin} onOpen={() => { setStatus({ has_pin: true }); setOpen(true) }} /> : items === null ? <p className="text-mute">Un attimo…</p> : items.length === 0 ? <div className="card text-center text-mute">Codici, documenti, accessi: cifrati e protetti dal PIN.<br />Aggiungete il primo elemento.</div> : (
+      {!open ? <Pin hasPin={status.has_pin} onOpen={() => { setStatus({ has_pin: true }); setOpen(true) }} /> : items === null ? <div className="skeleton" aria-busy="true"><i /><i /><i /></div> : items.length === 0 ? <div className="card text-center text-mute">Codici, documenti, accessi: cifrati e protetti dal PIN.<br />Aggiungete il primo elemento.</div> : (
         <div className="space-y-2">{items.map((i) => (
           <div key={i.id} className="card !rounded-2xl !p-4">
             <div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent/15 text-accent"><KeyRound size={18} strokeWidth={1.6} /></span>

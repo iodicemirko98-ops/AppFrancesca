@@ -45,7 +45,7 @@ export default function BuonoASapersi() {
     <div className="space-y-4">
       <PageHeader eyebrow="Le piccole cose" title="Buono a sapersi" action={<button aria-label="Nuova informazione" className="icon-btn" onClick={() => setSheet({})}><Plus size={22} /></button>} />
       <div className="relative"><Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-mute" /><input aria-label="Cerca" className="input !pl-11" placeholder="Cerca: scarpe, allergie, Wi-Fi…" value={q} onChange={(e) => setQ(e.target.value)} /></div>
-      {data === null ? <p className="text-mute">Un attimo…</p> : groups.length === 0 ? <div className="card text-center text-mute">{q ? 'Nessun risultato.' : 'Taglie, gusti, codici, cose da ricordare: scrivetele qui, serviranno al momento giusto.'}</div> : groups.map(([k, list]) => (
+      {data === null ? <div className="skeleton" aria-busy="true"><i /><i /><i /></div> : groups.length === 0 ? <div className="card text-center text-mute">{q ? 'Nessun risultato.' : 'Taglie, gusti, codici, cose da ricordare: scrivetele qui, serviranno al momento giusto.'}</div> : groups.map(([k, list]) => (
         <section key={k} className="space-y-2">
           <h2 className="eyebrow px-1">{CATS[k]}</h2>
           <div className="card divide-y divide-line !py-1">

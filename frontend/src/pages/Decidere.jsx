@@ -87,7 +87,7 @@ export default function Decidere() {
   return (
     <div className="space-y-4">
       <PageHeader eyebrow="Scegliamo insieme" title="Decidere insieme" action={<><button aria-label="Sorteggio rapido" className="icon-btn-soft" onClick={() => setSheet('coin')}><Dices size={20} strokeWidth={1.6} /></button><button aria-label="Nuova decisione" className="icon-btn" onClick={() => setSheet('new')}><Plus size={22} /></button></>} />
-      {data === null ? <p className="text-mute">Un attimo…</p> : data.length === 0 ? <div className="card text-center text-mute">Nessuna decisione in corso.<br />Cena, film, weekend: lanciate un sondaggio e votate in segreto.</div> : data.map((p) => <Poll key={p.id} p={p} reload={reload} />)}
+      {data === null ? <div className="skeleton" aria-busy="true"><i /><i /><i /></div> : data.length === 0 ? <div className="card text-center text-mute">Nessuna decisione in corso.<br />Cena, film, weekend: lanciate un sondaggio e votate in segreto.</div> : data.map((p) => <Poll key={p.id} p={p} reload={reload} />)}
       {sheet === 'new' && <Sheet title="Nuova decisione" onClose={() => setSheet(null)}><NewPoll onDone={() => { setSheet(null); reload() }} /></Sheet>}
       {sheet === 'coin' && <Sheet title="Sorteggio rapido" onClose={() => setSheet(null)}><Coin /></Sheet>}
     </div>

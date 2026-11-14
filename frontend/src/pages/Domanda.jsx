@@ -16,7 +16,7 @@ export default function Domanda() {
   const [editing, setEditing] = useState(false)
   const [err, setErr] = useState('')
   useEffect(() => { if (q?.my_answer != null && !editing) setText(q.my_answer) }, [q?.my_answer]) // eslint-disable-line
-  if (!q) return <p className="text-mute">Un attimo…</p>
+  if (!q) return <div className="skeleton" aria-busy="true"><i /><i /><i /></div>
   const answered = q.my_answer != null
   const save = async (e) => {
     e.preventDefault(); setErr('')

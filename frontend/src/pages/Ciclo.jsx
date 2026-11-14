@@ -12,7 +12,7 @@ export default function Ciclo() {
   const { data: shared } = useLive('/cycle/partner', [])
   const [start, setStart] = useState(iso(new Date()))
   const partner = couple.members.find((m) => m.id !== user.id)
-  if (!data) return <p className="text-mute">Un attimo…</p>
+  if (!data) return <div className="skeleton" aria-busy="true"><i /><i /><i /></div>
   const p = data.prediction
   const run = (fn) => async (...a) => { try { setData(await fn(...a)) } catch (e) { showToast(e.message) } }
   const add = run(() => api.post('/cycle/periods', { start }))

@@ -26,7 +26,7 @@ export default function Anno() {
   const { couple } = useApp()
   const [year, setYear] = useState(null)
   const { data: r } = useLive(year ? `/year?year=${year}` : '/year', [])
-  if (!r) return <p className="text-mute">Un attimo…</p>
+  if (!r) return <div className="skeleton" aria-busy="true"><i /><i /><i /></div>
   const names = couple.members.map((m) => m.name).join(' & ')
   return (
     <div className="space-y-4">

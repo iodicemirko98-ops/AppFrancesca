@@ -15,7 +15,7 @@ export default function Trash() {
     <div className="space-y-4">
       <PageHeader eyebrow="7 giorni" title="Eliminati di recente" action={<Link to="/altro" aria-label="Indietro" className="icon-btn-soft"><ChevronLeft size={20} /></Link>} />
       <p className="text-sm text-mute">Gli elementi eliminati restano qui 7 giorni, poi spariscono per sempre.</p>
-      {data === null ? <p className="text-mute">Un attimo…</p> : data.length === 0 ? <div className="card text-center text-mute">Il cestino è vuoto. ✨</div> : (
+      {data === null ? <div className="skeleton" aria-busy="true"><i /><i /><i /></div> : data.length === 0 ? <div className="card text-center text-mute">Il cestino è vuoto. ✨</div> : (
         <>
           <div className="space-y-2">{data.map((t) => (
             <div key={t.collection + t.id} className="card flex items-center gap-3 !rounded-2xl !p-4">

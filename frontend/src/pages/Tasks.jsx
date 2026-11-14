@@ -63,7 +63,7 @@ function Cats({ cats, onChange }) {
 
 export default function Tasks() {
   const { couple, user, home, showToast } = useApp()
-  const { data: tasks, reload } = useLive('/tasks', ['tasks'])
+  const { data: tasks, reload, setData: setTasks } = useLive('/tasks', ['tasks'])
   const { data: cats, reload: reloadCats } = useLive('/task-categories', ['task_categories'])
   const [sheet, setSheet] = useState(null)
   const [who, setWho] = useState('tutte')
@@ -73,7 +73,10 @@ export default function Tasks() {
   const name = (id) => (id === 'both' ? 'Entrambi' : id === user.id ? 'Io' : couple.members.find((m) => m.id === id)?.name)
   const visible = (tasks || []).filter((t) => who === 'tutte' || t.assignee === who || t.assignee === 'both')
   const open = visible.filter((t) => !t.done), done = visible.filter((t) => t.done)
-  const toggle = async (t) => { await api.patch(`/tasks/${t.id}`, { done: !t.done }); reload() }
+  const toggle = async (t) => {
+    setTasks((cur) => cur.map((x) => (x.id === t.id ? { ...x, done: !t.done } : x))) // subito, senza aspettare la rete
+    try { await api.patch(`/tasks/${t.id}`, { done: !t.done }) } finally { reload() }
+  }
   const nudge = async (t) => {
     try { await api.post(`/tasks/${t.id}/nudge`); showToast(`Sollecito inviato a ${partner.name} 😏`); reload() } catch (e) { showToast(e.message) }
   }
@@ -108,7 +111,7 @@ export default function Tasks() {
           <button key={k} role="tab" aria-selected={who === k} onClick={() => setWho(k)} className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium ${who === k ? 'bg-accent text-accent-ink' : 'bg-card text-mute ring-1 ring-line'}`}>{l}</button>
         ))}
       </div>
-      {tasks === null ? <p className="text-mute">Un attimo…</p> : open.length === 0 ? <div className="card text-center text-mute">Tutto fatto! 🎉<br />Niente da fare per ora.</div> : <div className="space-y-2">{open.map((t) => <Item key={t.id} t={t} />)}</div>}
+      {tasks === null ? <div className="skeleton" aria-busy="true"><i /><i /><i /></div> : open.length === 0 ? <div className="card text-center text-mute">Tutto fatto! 🎉<br />Niente da fare per ora.</div> : <div className="space-y-2">{open.map((t) => <Item key={t.id} t={t} />)}</div>}
       {done.length > 0 && (
         <>
           <button className="text-sm font-semibold text-mute" onClick={() => setShowDone(!showDone)}>{showDone ? '▾' : '▸'} Completate ({done.length})</button>

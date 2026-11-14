@@ -37,7 +37,7 @@ function Detail({ id, onClose, onEdit }) {
   const [amount, setAmount] = useState('')
   const [note, setNote] = useState('')
   const name = (uid) => (uid === user.id ? 'Tu' : couple.members.find((m) => m.id === uid)?.name)
-  if (!g) return <p className="text-mute">Un attimo…</p>
+  if (!g) return <div className="skeleton" aria-busy="true"><i /><i /><i /></div>
   const add = async (sign) => {
     const v = Number(amount); if (!v) return
     try { setData(await api.post(`/goals/${id}/deposits`, { amount: sign * Math.abs(v), note: note.trim() || null })); setAmount(''); setNote('') } catch (e) { showToast(e.message) }
@@ -68,7 +68,7 @@ export default function Risparmi() {
   return (
     <div className="space-y-4">
       <PageHeader eyebrow="Mettiamo da parte" title="Risparmi" action={<button aria-label="Nuovo obiettivo" className="icon-btn" onClick={() => setSheet({ form: true })}><Plus size={22} /></button>} />
-      {data === null ? <p className="text-mute">Un attimo…</p> : data.length === 0 ? <div className="card text-center text-mute">Nessun obiettivo ancora.<br />Una vacanza, un divano, un fondo emergenze: da dove partite?</div> : data.map((g) => (
+      {data === null ? <div className="skeleton" aria-busy="true"><i /><i /><i /></div> : data.length === 0 ? <div className="card text-center text-mute">Nessun obiettivo ancora.<br />Una vacanza, un divano, un fondo emergenze: da dove partite?</div> : data.map((g) => (
         <button key={g.id} onClick={() => setSheet({ id: g.id })} className="card block w-full space-y-3 text-left">
           <div className="flex items-center gap-3"><span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent/15 text-accent">{g.reached ? <Target size={20} strokeWidth={1.6} /> : <PiggyBank size={20} strokeWidth={1.6} />}</span>
             <span className="min-w-0 flex-1"><span className="display block truncate text-xl">{g.name}</span><span className="text-sm text-mute">{eur(g.saved)} di {eur(g.target)}</span></span><span className="font-medium text-accent">{g.pct}%</span></div>

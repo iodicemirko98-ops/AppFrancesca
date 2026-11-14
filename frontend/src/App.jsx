@@ -38,7 +38,7 @@ function Toast() {
   const { toast, closeToast } = useApp()
   if (!toast) return null
   return (
-    <div role="status" className="fixed inset-x-0 bottom-24 z-40 mx-auto flex w-[calc(100%-2rem)] max-w-sm items-center justify-between gap-3 rounded-2xl bg-ink px-4 py-3 text-bg shadow-lg" style={{ marginBottom: 'env(safe-area-inset-bottom)' }}>
+    <div role="status" className="toast-in fixed inset-x-0 bottom-24 z-40 mx-auto flex w-[calc(100%-2rem)] max-w-sm items-center justify-between gap-3 rounded-2xl bg-ink px-4 py-3 text-bg shadow-lg" style={{ marginBottom: 'env(safe-area-inset-bottom)' }}>
       <span>{toast.text}</span>
       {toast.action && <button className="font-bold underline" onClick={async () => { closeToast(); await toast.action.run() }}>{toast.action.label}</button>}
     </div>

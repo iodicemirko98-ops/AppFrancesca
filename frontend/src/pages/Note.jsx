@@ -47,7 +47,7 @@ export default function Note() {
       <div className="flex gap-2" role="tablist">{Object.entries(KIND).map(([k, l]) => <button key={k} role="tab" aria-selected={kind === k} onClick={() => { setKind(k) }} className={`rounded-full px-4 py-1.5 text-sm font-medium ${kind === k ? 'bg-accent text-accent-ink' : 'bg-card text-mute ring-1 ring-line'}`}>{l}</button>)}</div>
       {kind === 'capsula' && <p className="text-sm text-mute">Scrivete un messaggio per il futuro: resta sigillato per entrambi fino al giorno scelto.</p>}
       {kind === 'storia' && <p className="text-sm text-mute">I capitoli della vostra storia, in ordine di tempo.</p>}
-      {data === null ? <p className="text-mute">Un attimo…</p> : data.length === 0 ? <div className="card text-center text-mute">{kind === 'nota' ? 'Nessuna nota. Un pensiero, una lista, un promemoria.' : kind === 'capsula' ? 'Nessuna capsula. Scrivete la prima!' : 'Raccontate come tutto è iniziato.'}</div> : (
+      {data === null ? <div className="skeleton" aria-busy="true"><i /><i /><i /></div> : data.length === 0 ? <div className="card text-center text-mute">{kind === 'nota' ? 'Nessuna nota. Un pensiero, una lista, un promemoria.' : kind === 'capsula' ? 'Nessuna capsula. Scrivete la prima!' : 'Raccontate come tutto è iniziato.'}</div> : (
         <div className={kind === 'storia' ? 'space-y-4 border-l-2 border-accent/30 pl-4' : 'space-y-2'}>
           {data.map((n) => n.locked ? (
             <div key={n.id} className="card flex items-center gap-4 !p-4">

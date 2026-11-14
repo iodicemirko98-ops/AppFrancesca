@@ -90,7 +90,7 @@ export default function Viaggi() {
       {data && <div className="flex gap-2"><span className="chip"><MapPin size={14} />{data.places} {data.places === 1 ? 'posto' : 'posti'}</span><span className="chip-line"><Globe2 size={14} />{data.countries} {data.countries === 1 ? 'paese' : 'paesi'}</span></div>}
       <TripMap items={items} onPick={(t) => setSheet({ trip: t })} />
       <h2 className="eyebrow px-1 pt-1">Diario dei viaggi</h2>
-      {data === null ? <p className="text-mute">Un attimo…</p> : items.length === 0 ? <div className="card text-center text-mute">Dove siete stati? Aggiungete il primo posto.</div> : <div className="space-y-2">{items.map((t) => (
+      {data === null ? <div className="skeleton" aria-busy="true"><i /><i /><i /></div> : items.length === 0 ? <div className="card text-center text-mute">Dove siete stati? Aggiungete il primo posto.</div> : <div className="space-y-2">{items.map((t) => (
         <button key={t.id} onClick={() => setSheet({ trip: t })} className="card flex w-full items-center gap-4 !rounded-2xl !p-4 text-left">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-accent/15 text-accent"><MapPin size={20} strokeWidth={1.6} /></span>
           <span className="min-w-0 flex-1"><span className="display block truncate text-xl">{t.name}</span><span className="block text-sm text-mute">{[fmtWhen(t.when), t.country].filter(Boolean).join(' · ')}</span>{t.notes && <span className="display block truncate italic text-mute">{t.notes}</span>}</span>
