@@ -14,7 +14,7 @@ const MODULES = {
 const NOTIFS = {
   eventi: 'Promemoria eventi', attivita: 'Attività assegnate e completate', solleciti: 'Solleciti',
   domanda: 'Domanda del giorno', risposta_partner: 'Risposta del partner', sondaggi: 'Nuovi sondaggi',
-  capsule: 'Capsula sbloccata', regali: 'Radar regali',
+  capsule: 'Capsula sbloccata', regali: 'Radar regali', trivia: 'Sfide Trivia',
 }
 
 function Section({ title, children }) {
@@ -163,7 +163,7 @@ export default function Settings() {
         )}
         {Object.entries(NOTIFS).map(([k, l]) => (
           <Row key={k} title={l}>
-            <Toggle label={l} disabled={!notif.master} checked={notif.types[k]}
+            <Toggle label={l} disabled={!notif.master} checked={notif.types[k] !== false}
               onChange={run((v) => saveProfile({ notifications: { types: { [k]: v } } }))} />
           </Row>
         ))}

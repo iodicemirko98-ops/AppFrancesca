@@ -17,6 +17,7 @@ from .routes_memories import router as memories_router
 from .routes_money import router as money_router
 from .routes_private import router as private_router
 from .routes_fun import router as fun_router
+from .routes_trivia import router as trivia_router
 
 
 @asynccontextmanager
@@ -47,6 +48,7 @@ app.include_router(memories_router)
 app.include_router(money_router)
 app.include_router(private_router)
 app.include_router(fun_router)
+app.include_router(trivia_router)
 app.include_router(ws_router)
 app.include_router(push_router)
 

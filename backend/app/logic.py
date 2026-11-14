@@ -23,6 +23,7 @@ MODULES = {
     "disegno": True,
     "ciclo": False,  # opzionale, disattivato di default
     "anno": True,
+    "trivia": True,
 }
 
 NOTIFICATION_TYPES = {
@@ -34,11 +35,12 @@ NOTIFICATION_TYPES = {
     "sondaggi": True,
     "capsule": True,
     "regali": True,
+    "trivia": True,
 }
 
 # Collezioni (aggiunte nelle fasi successive) i cui documenti hanno `couple_id`
 # e vanno spostati nello spazio condiviso quando il partner si collega.
-COUPLE_COLLECTIONS: list[str] = ["events", "tasks", "task_categories", "lists", "notifications", "answers", "polls", "bucket", "wishes", "facts", "notes", "trips", "goals", "expenses", "vault", "drawings"]
+COUPLE_COLLECTIONS: list[str] = ["events", "tasks", "task_categories", "lists", "notifications", "answers", "polls", "bucket", "wishes", "facts", "notes", "trips", "goals", "expenses", "vault", "drawings", "trivia_matches"]
 
 DAY_MILESTONES = [100, 200, 300, 500, 1000, 1500, 2000, 2500, 3000]
 

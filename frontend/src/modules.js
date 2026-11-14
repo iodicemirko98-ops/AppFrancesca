@@ -1,4 +1,4 @@
-import { CalendarDays, CheckCircle2, ListChecks, MessageCircleQuestion, Scale, Rocket, Gift, Lightbulb, StickyNote, PiggyBank, Lock, Brush, Flower2, Sparkles, MapPin, Wallet, Bell, Trash2, Settings, Home } from 'lucide-react'
+import { CalendarDays, CheckCircle2, ListChecks, MessageCircleQuestion, Scale, Rocket, Gift, Lightbulb, StickyNote, PiggyBank, Lock, Brush, Flower2, Sparkles, MapPin, Wallet, Bell, Trash2, Settings, Home, Trophy } from 'lucide-react'
 
 // Registro delle sezioni. `nav`: compare nella barra in basso. `ready`: la sezione esiste già.
 export const SECTIONS = [
@@ -16,6 +16,7 @@ export const SECTIONS = [
   { key: 'spese', path: '/spese', label: 'Spese comuni', icon: Wallet, ready: true },
   { key: 'cassaforte', path: '/cassaforte', label: 'Cassaforte', icon: Lock, ready: true },
   { key: 'disegno', path: '/disegno', label: 'Disegno condiviso', icon: Brush, ready: true },
+  { key: 'trivia', path: '/trivia', label: 'Trivia', icon: Trophy, ready: true },
   { key: 'ciclo', path: '/ciclo', label: 'Ciclo', icon: Flower2, ready: true },
   { key: 'anno', path: '/anno', label: 'Il nostro anno', icon: Sparkles, ready: true },
 ]
