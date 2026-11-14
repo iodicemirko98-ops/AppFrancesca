@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, LogOut } from 'lucide-react'
 import { useApp } from '../state'
 import { PageHeader } from '../components/ui'
 import { SECTIONS, UTILITY } from '../modules'
@@ -14,13 +14,14 @@ const Item = ({ to, icon: Icon, label, badge }) => (
 )
 
 export default function More() {
-  const { couple, home } = useApp()
+  const { couple, home, logout } = useApp()
   const extra = SECTIONS.filter((s) => !s.nav && s.ready && (s.key === 'ciclo' ? couple.modules?.ciclo === true : couple.modules?.[s.key] !== false))
   return (
     <div className="space-y-6">
       <PageHeader eyebrow="Tutto il resto" title="Altro" />
       {extra.length > 0 && <div className="card divide-y divide-line !py-2">{extra.map((s) => <Item key={s.key} to={s.path} icon={s.icon} label={s.label} />)}</div>}
       <div className="card divide-y divide-line !py-2">{UTILITY.map((u) => <Item key={u.path} to={u.path} icon={u.icon} label={u.label} badge={u.path === '/notifiche' ? home.unread_notifications : 0} />)}</div>
+      <button onClick={logout} className="btn-soft flex w-full items-center justify-center gap-2"><LogOut size={18} />Esci dall'account</button>
     </div>
   )
 }
