@@ -63,3 +63,7 @@ Nessuna pubblicità né analytics di terzi. Le registrazioni si chiudono dopo du
 - **Promemoria automatici** (scheduler interno, ogni minuto, senza duplicati): promemoria degli eventi con orario, domanda del giorno dopo le 19 a chi non ha risposto, attività in scadenza oggi dalle 8.
 - **Render piano gratuito**: il servizio si addormenta dopo 15 minuti, e con lui lo scheduler. Per promemoria puntuali fai chiamare `https://noidue-api.onrender.com/health` ogni 5–10 minuti (UptimeRobot gratuito, oppure una GitHub Action con cron).
 - Animazioni di entrata leggere, disattivate con `prefers-reduced-motion`.
+
+### Recupero password
+- **Con il partner**: Impostazioni → «Codice di recupero» genera un codice monouso di 8 caratteri (15 minuti, 5 tentativi). Chi ha dimenticato la password usa «Password dimenticata?» nel login.
+- **D'emergenza** (se non c'è un partner che possa aiutare): su Render aggiungi le variabili `RESET_EMAIL` e `RESET_PASSWORD` (min. 8 caratteri), attendi il riavvio, accedi, poi **rimuovile**.

@@ -22,6 +22,10 @@ from .routes_fun import router as fun_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_indexes()
+    if settings.reset_email and len(settings.reset_password) >= 8:
+        from .db import get_db
+        from .security import hash_password
+        await get_db().users.update_one({"email": settings.reset_email.strip().lower()}, {"$set": {"password_hash": hash_password(settings.reset_password)}})
     task = asyncio.create_task(scheduler.loop())
     try:
         yield

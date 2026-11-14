@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     jwt_days: int = 60
     cors_origins: str = "*"  # in produzione: l'URL del frontend
     vault_key: str = ""  # chiave per la cassaforte; se vuota si usa JWT_SECRET (non cambiarla dopo!)
+    reset_email: str = ""  # recupero d'emergenza: email + nuova password all'avvio (poi rimuovile!)
+    reset_password: str = ""
     max_users: int = 2  # app privata: al massimo due account in tutto
 
 

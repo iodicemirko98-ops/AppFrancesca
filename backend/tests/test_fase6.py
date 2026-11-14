@@ -93,3 +93,23 @@ async def test_promemoria_domanda_e_attivita_in_scadenza(duo):
     tb = [i["text"] for i in (await c.get("/api/notifications", headers=H(b))).json()["items"] if i["text"].startswith("Il tuo partner")]
     assert tb == ["Il tuo partner ha risposto alla domanda di oggi: tocca a te!"]
     assert not any("ti aspetta" in i["text"] for i in (await c.get("/api/notifications", headers=H(a))).json()["items"])  # A ha già risposto
+
+
+async def test_recupero_password_con_codice_del_partner(duo):
+    c, a, b = duo
+    r = await c.post("/api/auth/reset-code", headers=H(a))
+    code = r.json()["code"]
+    assert len(code) == 8
+    body = {"email": "b@x.it", "code": code, "password": "nuovapassword1"}
+    assert (await c.post("/api/auth/reset", json={**body, "code": "SBAGLIAT"})).status_code == 400
+    ok = await c.post("/api/auth/reset", json=body)
+    assert ok.status_code == 200 and ok.json()["token"]
+    assert (await c.post("/api/auth/login", json={"email": "b@x.it", "password": "nuovapassword1"})).status_code == 200
+    assert (await c.post("/api/auth/login", json={"email": "b@x.it", "password": "password123"})).status_code == 401
+    assert (await c.post("/api/auth/reset", json=body)).status_code == 400  # monouso
+    # tentativi limitati
+    code = (await c.post("/api/auth/reset-code", headers=H(a))).json()["code"]
+    for _ in range(5):
+        await c.post("/api/auth/reset", json={**body, "code": "SBAGLIAT"})
+    assert (await c.post("/api/auth/reset", json={**body, "code": code})).status_code == 400
+    assert (await c.post("/api/auth/reset-code")).status_code in (401, 403)

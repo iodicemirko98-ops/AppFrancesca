@@ -43,6 +43,7 @@ export default function Settings() {
   const [push, setPush] = useState('...')
   useEffect(() => { pushState().then(setPush).catch(() => setPush('unsupported')) }, [])
   const togglePush = run(async (v) => { if (v) await enablePush(); else await disablePush(); setPush(await pushState()) })
+  const [rc, setRc] = useState(null)
   const me = couple.members.find((m) => m.id === user.id)
   const notif = user.notifications
 
@@ -137,6 +138,11 @@ export default function Settings() {
       </Section>
 
       <Section title="Dati e account">
+        {couple.members.length > 1 && (
+          <Row title="Codice di recupero" hint={rc ? `${rc.code} · vale ${rc.minutes} minuti` : 'Se il partner ha dimenticato la password'}>
+            <button className="btn-soft !px-4 !py-2" onClick={run(async () => setRc(await api.post('/auth/reset-code')))}>{rc ? 'Nuovo' : 'Genera'}</button>
+          </Row>
+        )}
         <Row title="Esporta i dati" hint="Tutto in un file JSON"><button className="btn-soft !px-4 !py-2" onClick={exportData}>Esporta</button></Row>
         <Row title="Esci"><button className="btn-soft !px-4 !py-2" onClick={logout}>Esci</button></Row>
         <div className="py-3">

@@ -1,5 +1,6 @@
+import secrets
 import uuid
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field, field_validator
@@ -203,6 +204,54 @@ async def register(body: RegisterIn):
         await db.users.update_one({"_id": user["_id"]}, {"$set": {"couple_id": couple["_id"]}})
 
     user = await db.users.find_one({"_id": user["_id"]})
+    return {"token": create_token(user["_id"]), "user": public_user(user)}
+
+
+class ResetIn(BaseModel):
+    email: EmailStr
+    code: str
+    password: str = Field(min_length=8, max_length=128)
+
+    @field_validator("email")
+    @classmethod
+    def _lower(cls, v):
+        return v.lower()
+
+
+RESET_MINUTES = 15
+
+
+@router.post("/auth/reset-code")
+async def reset_code(user: dict = Depends(current_user)):
+    """Il partner (già dentro) genera un codice monouso per far reimpostare la password all'altro."""
+    couple = await get_db().couples.find_one({"_id": user.get("couple_id")})
+    partner = next((m for m in (couple or {}).get("members", []) if m != user["_id"]), None)
+    if not partner:
+        raise HTTPException(400, "Il partner non è ancora collegato")
+    code = "".join(secrets.choice("ABCDEFGHJKLMNPQRSTUVWXYZ23456789") for _ in range(8))
+    await get_db().password_resets.replace_one(
+        {"_id": partner},
+        {"_id": partner, "code_hash": hash_password(code), "tries": 0,
+         "expires": (datetime.now(timezone.utc) + timedelta(minutes=RESET_MINUTES)).isoformat()},
+        upsert=True)
+    return {"code": code, "minutes": RESET_MINUTES}
+
+
+@router.post("/auth/reset")
+async def reset_password(body: ResetIn):
+    db = get_db()
+    user = await db.users.find_one({"email": body.email})
+    bad = HTTPException(400, "Codice non valido o scaduto")
+    if not user:
+        raise bad
+    r = await db.password_resets.find_one({"_id": user["_id"]})
+    if not r or r["expires"] < datetime.now(timezone.utc).isoformat() or r["tries"] >= 5:
+        raise bad
+    if not verify_password(body.code.strip().upper(), r["code_hash"]):
+        await db.password_resets.update_one({"_id": user["_id"]}, {"$inc": {"tries": 1}})
+        raise bad
+    await db.users.update_one({"_id": user["_id"]}, {"$set": {"password_hash": hash_password(body.password)}})
+    await db.password_resets.delete_one({"_id": user["_id"]})
     return {"token": create_token(user["_id"]), "user": public_user(user)}
 
 
