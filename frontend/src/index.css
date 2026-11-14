@@ -55,7 +55,7 @@ input, textarea, select { font-size: 16px; } /* niente zoom automatico su iPhone
 }
 
 /* Fase 6: entrata morbida delle pagine; nessuna animazione per chi la preferisce ridotta */
-@keyframes noidue-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes noidue-in { from { opacity: 0; } to { opacity: 1; } }
 main > * { animation: noidue-in .28s ease-out both; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
