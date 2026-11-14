@@ -94,17 +94,17 @@ main .space-y-2 > :nth-child(n+5), main .space-y-3 > :nth-child(n+5) { animation
 html[data-sfondo="sfumatura"] body { background-image: linear-gradient(165deg, rgb(var(--accent) / .22), rgb(var(--bg)) 55%); background-attachment: fixed; }
 html[data-sfondo="aloni"] body { background-image: radial-gradient(60% 40% at 0% 0%, rgb(var(--accent) / .28), transparent 70%), radial-gradient(55% 40% at 100% 35%, rgb(var(--accent) / .16), transparent 70%), radial-gradient(60% 45% at 20% 100%, rgb(var(--accent) / .22), transparent 70%); background-attachment: fixed; }
 html[data-sfondo="puntini"] body { background-image: radial-gradient(rgb(var(--accent) / .22) 1.2px, transparent 1.4px); background-size: 22px 22px; }
-html[data-sfondo="foto"] body::before { content: ""; position: fixed; inset: 0; z-index: -1; background: linear-gradient(rgb(var(--bg) / var(--dim, .55)), rgb(var(--bg) / var(--dim, .55))), var(--foto) center / cover no-repeat; }
+html[data-sfondo="foto"] body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; height: 100lvh; z-index: -1; pointer-events: none; background: linear-gradient(rgb(var(--bg) / var(--dim, .55)), rgb(var(--bg) / var(--dim, .55))), var(--foto) center / cover no-repeat; }
 .hue-slider { -webkit-appearance: none; appearance: none; height: 14px; border-radius: 999px; width: 100%;
   background: linear-gradient(90deg, hsl(0 60% 55%), hsl(40 70% 52%), hsl(90 50% 45%), hsl(150 50% 42%), hsl(200 60% 50%), hsl(250 55% 58%), hsl(300 50% 55%), hsl(360 60% 55%)); }
 .hue-slider::-webkit-slider-thumb { -webkit-appearance: none; height: 28px; width: 28px; border-radius: 50%; background: rgb(var(--card)); border: 3px solid rgb(var(--ink)); box-shadow: 0 1px 4px rgb(0 0 0 / .3); }
 .hue-slider::-moz-range-thumb { height: 24px; width: 24px; border-radius: 50%; background: rgb(var(--card)); border: 3px solid rgb(var(--ink)); }
 
-/* con la foto: schede semitrasparenti a "vetro" per lasciarla intravedere */
+/* con la foto: schede semitrasparenti per lasciarla intravedere (niente sfocatura: su iPhone appesantiva troppo) */
 html[data-sfondo="foto"] .card,
 html[data-sfondo="foto"] .icon-btn-soft,
 html[data-sfondo="foto"] .chip-line,
 html[data-sfondo="foto"] nav > div {
   background-color: rgb(var(--card) / var(--card-a, .62));
-  -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2);
 }
+html[data-sfondo="foto"] nav > div { -webkit-backdrop-filter: none; backdrop-filter: none; }

@@ -7,6 +7,13 @@ import App from './App'
 import './index.css'
 import { applyLook } from './util'
 
+try {
+  if (new URLSearchParams(location.search).get('sfondo') === 'off') {
+    localStorage.removeItem('sfondo-foto')
+    const l = JSON.parse(localStorage.getItem('look') || '{}'); l.bg = 'nessuno'; localStorage.setItem('look', JSON.stringify(l))
+    history.replaceState(null, '', location.pathname)
+  }
+} catch { /* ignora */ }
 applyLook() // colori e sfondo salvati su questo dispositivo, subito all'avvio
 
 registerSW({ immediate: true })

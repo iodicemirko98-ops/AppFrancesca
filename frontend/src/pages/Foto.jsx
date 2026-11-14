@@ -13,7 +13,6 @@ function Viewer({ photo, onClose, onChanged }) {
   const [full, setFull] = useState(null)
   const [cap, setCap] = useState(photo.caption || '')
   useEffect(() => { api.get(`/photos/${photo.id}`).then(setFull).catch(() => {}) }, [photo.id])
-  useEffect(() => { const o = document.body.style.overflow; document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = o } }, [])
   const saveCap = async () => { if (cap.trim() !== (photo.caption || '')) { await api.patch(`/photos/${photo.id}`, { caption: cap }); onChanged() } }
   const fav = async () => { await api.patch(`/photos/${photo.id}`, { fav: !photo.fav }); onChanged(); onClose() }
   const del = async () => {
