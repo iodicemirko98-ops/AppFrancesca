@@ -9,7 +9,7 @@ import { applyLook } from './util'
 
 try {
   if (new URLSearchParams(location.search).get('sfondo') === 'off') {
-    localStorage.removeItem('sfondo-foto')
+    localStorage.removeItem('sfondo-foto'); localStorage.setItem('sfondo-off', '1')
     const l = JSON.parse(localStorage.getItem('look') || '{}'); l.bg = 'nessuno'; localStorage.setItem('look', JSON.stringify(l))
     history.replaceState(null, '', location.pathname)
   }

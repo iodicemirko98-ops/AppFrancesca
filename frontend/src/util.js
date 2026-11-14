@@ -29,11 +29,11 @@ function palette(h, dark) {
   return { accent, 'accent-ink': ink, ...v }
 }
 
-let look = { hue: null, bg: 'nessuno' }
+let look = { hue: null, bg: 'nessuno', dim: 55, card: 62 }
 try { look = { ...look, ...JSON.parse(localStorage.getItem('look') || '{}') } } catch { /* ignora */ }
 
 export function applyLook(next) {
-  if (next) { look = { hue: next.hue ?? null, bg: next.bg || 'nessuno' }; try { localStorage.setItem('look', JSON.stringify(look)) } catch { /* ignora */ } }
+  if (next) { look = { hue: next.hue ?? null, bg: next.bg || 'nessuno', dim: next.dim ?? look.dim ?? 55, card: next.card ?? look.card ?? 62, bgv: next.bgv }; try { localStorage.setItem('look', JSON.stringify(look)) } catch { /* ignora */ } }
   const root = document.documentElement, dark = root.classList.contains('dark')
   const names = ['bg', 'card', 'soft', 'ink', 'mute', 'line', 'accent', 'accent-ink']
   if (look.hue === null) names.forEach((n) => root.style.removeProperty('--' + n))
@@ -42,14 +42,13 @@ export function applyLook(next) {
   let bg = look.bg
   let foto = null
   try { foto = localStorage.getItem('sfondo-foto') } catch { /* ignora */ }
-  if (bg === 'foto' && !foto) bg = 'nessuno'
+  let off = false; try { off = !!localStorage.getItem('sfondo-off') } catch { /* ignora */ }
+  if (bg === 'foto' && (!foto || off)) bg = 'nessuno'
   root.dataset.sfondo = bg
   if (bg === 'foto') {
     root.style.setProperty('--foto', `url(${foto})`)
-    let dim = 55; try { dim = Number(localStorage.getItem('sfondo-dim') ?? 55) } catch { /* ignora */ }
-    root.style.setProperty('--dim', String(dim / 100))
-    let ca = 62; try { ca = Number(localStorage.getItem('sfondo-card') ?? 62) } catch { /* ignora */ }
-    root.style.setProperty('--card-a', String(ca / 100))
+    root.style.setProperty('--dim', String((look.dim ?? 55) / 100))
+    root.style.setProperty('--card-a', String((look.card ?? 62) / 100))
   }
   const acc = look.hue === null ? (dark ? [30, 24, 21] : [194, 96, 63]) : (dark ? palette(look.hue, true).bg : palette(look.hue, false).accent)
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', hex(acc))
@@ -79,8 +78,8 @@ export function resizePhoto(file, max = 1000, quality = 0.72) {
   })
 }
 
-// Foto di sfondo: ridimensionata e salvata solo su questo dispositivo.
-export function setBackgroundPhoto(file, max = 1100) {
+// Foto di sfondo: ridimensionata; si salva sull'account (sincronizzata tra i dispositivi) e in locale per essere veloce.
+export function resizeBackground(file, max = 1000) {
   return new Promise((resolve, reject) => {
     const img = new Image(), url = URL.createObjectURL(file)
     img.onload = () => {
@@ -88,15 +87,15 @@ export function setBackgroundPhoto(file, max = 1100) {
       const c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k)
       c.getContext('2d').drawImage(img, 0, 0, c.width, c.height)
       URL.revokeObjectURL(url)
-      try { localStorage.setItem('sfondo-foto', c.toDataURL('image/jpeg', 0.65)); resolve() } catch { reject(new Error('Foto troppo grande per questo dispositivo')) }
+      resolve(c.toDataURL('image/jpeg', 0.6))
     }
     img.onerror = () => reject(new Error('Immagine non leggibile'))
     img.src = url
   })
 }
-export const removeBackgroundPhoto = () => { try { localStorage.removeItem('sfondo-foto') } catch { /* ignora */ } }
-export const setCardOpacity = (v) => { try { localStorage.setItem('sfondo-card', String(v)) } catch { /* ignora */ } }
-export const setBackgroundDim = (v) => { try { localStorage.setItem('sfondo-dim', String(v)) } catch { /* ignora */ } }
+export const storeBackground = (data, v) => { try { localStorage.removeItem('sfondo-off'); localStorage.setItem('sfondo-foto', data); localStorage.setItem('sfondo-foto-v', v || '') } catch { /* ignora */ } }
+export const localBackgroundVersion = () => { try { return localStorage.getItem('sfondo-foto') ? localStorage.getItem('sfondo-foto-v') || '' : null } catch { return null } }
+export const removeBackgroundPhoto = () => { try { localStorage.removeItem('sfondo-off'); localStorage.removeItem('sfondo-foto'); localStorage.removeItem('sfondo-foto-v') } catch { /* ignora */ } }
 
 // Ridimensiona una foto a un quadrato (centrato) e la restituisce come data URL JPEG leggero.
 export function resizeImage(file, size = 256) {

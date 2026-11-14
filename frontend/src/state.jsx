@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { api, getToken, setToken, wsUrl, setCurrentUser, resetOffline } from './api'
 import { flush, onFlushed } from './offline'
-import { applyLook, applyTheme } from './util'
+import { applyLook, applyTheme, localBackgroundVersion, storeBackground } from './util'
 
 const Ctx = createContext(null)
 export const useApp = () => useContext(Ctx)
@@ -18,6 +18,9 @@ export function AppProvider({ children }) {
     setHome(h)
     applyLook(u.look)
     applyTheme(u.theme)
+    if (u.look?.bgv && localBackgroundVersion() !== u.look.bgv) {  // foto scelta da un altro dispositivo
+      api.get('/me/background').then((r) => { if (r.photo) { storeBackground(r.photo, r.bgv); applyLook() } }).catch(() => {})
+    }
     return u
   }, [])
 

@@ -71,7 +71,19 @@ class ProfileIn(BaseModel):
             raise ValueError("Colore non valido")
         if bg not in LOOK_BG:
             raise ValueError("Sfondo non valido")
-        return {"hue": hue, "bg": bg}
+        out = {"hue": hue, "bg": bg}
+        for k, lo, hi in (("dim", 10, 90), ("card", 25, 100)):
+            x = v.get(k)
+            if x is not None:
+                if isinstance(x, bool) or not isinstance(x, int) or not lo <= x <= hi:
+                    raise ValueError("Valore non valido")
+                out[k] = x
+        bgv = v.get("bgv")
+        if bgv is not None:
+            if not isinstance(bgv, str) or len(bgv) > 40:
+                raise ValueError("Versione non valida")
+            out["bgv"] = bgv
+        return out
 
     @field_validator("theme")
     @classmethod
@@ -284,6 +296,42 @@ async def login(body: LoginIn):
 @router.get("/me")
 async def me(user: dict = Depends(current_user)):
     return public_user(user)
+
+
+BG_PREFIX = "data:image/jpeg;base64,"
+
+
+class BgIn(BaseModel):
+    photo: str = Field(max_length=450_000)
+
+    @field_validator("photo")
+    @classmethod
+    def jpeg(cls, v):
+        if not v.startswith(BG_PREFIX):
+            raise ValueError("Formato non valido")
+        return v
+
+
+@router.get("/me/background")
+async def get_background(user: dict = Depends(current_user)):
+    return {"photo": user.get("bg_photo"), "bgv": (user.get("look") or {}).get("bgv")}
+
+
+@router.put("/me/background")
+async def put_background(body: BgIn, user: dict = Depends(current_user)):
+    bgv = uuid.uuid4().hex[:12]
+    look = {**(user.get("look") or {"hue": None, "bg": "nessuno"}), "bg": "foto", "bgv": bgv}
+    await get_db().users.update_one({"_id": user["_id"]}, {"$set": {"bg_photo": body.photo, "look": look}})
+    return {"bgv": bgv, "look": look}
+
+
+@router.delete("/me/background")
+async def delete_background(user: dict = Depends(current_user)):
+    look = {k: v for k, v in (user.get("look") or {}).items() if k != "bgv"}
+    if look.get("bg") == "foto":
+        look["bg"] = "nessuno"
+    await get_db().users.update_one({"_id": user["_id"]}, {"$set": {"look": look}, "$unset": {"bg_photo": ""}})
+    return {"look": look}
 
 
 @router.patch("/me")

@@ -3,7 +3,7 @@ import { disablePush, enablePush, isIOS, isStandalone, pushState } from '../push
 import { useApp } from '../state'
 import { api } from '../api'
 import { Avatar, PageHeader, Row, Toggle } from '../components/ui'
-import { applyLook, downloadBlob, getLook, removeBackgroundPhoto, resizeImage, setBackgroundDim, setCardOpacity, setBackgroundPhoto } from '../util'
+import { applyLook, downloadBlob, getLook, removeBackgroundPhoto, resizeImage, resizeBackground, storeBackground } from '../util'
 
 const MODULES = {
   calendario: 'Calendario', attivita: 'Attività', liste: 'Liste', domanda: 'Domanda del giorno',
@@ -46,9 +46,7 @@ export default function Settings() {
   const [rc, setRc] = useState(null)
   const [look, setLook] = useState(() => ({ ...getLook() }))
   const saveT = useRef()
-  const [dim, setDim] = useState(() => Number(localStorage.getItem('sfondo-dim') ?? 55))
   const [hasFoto, setHasFoto] = useState(() => !!localStorage.getItem('sfondo-foto'))
-  const [cardA, setCardA] = useState(() => Number(localStorage.getItem('sfondo-card') ?? 62))
   const photoRef = useRef()
   const changeLook = (patch, save = true) => {
     const n = { ...look, ...patch }
@@ -127,21 +125,23 @@ export default function Settings() {
             </div>
             <input ref={photoRef} type="file" accept="image/*" hidden onChange={run(async (e) => {
               const f = e.target.files[0]; if (!f) return
-              await setBackgroundPhoto(f); setHasFoto(true); changeLook({ bg: 'foto' }); e.target.value = ''
+              const data = await resizeBackground(f)
+              const r = await api.put('/me/background', { photo: data })
+              storeBackground(data, r.bgv); setHasFoto(true); setLook({ ...look, ...r.look }); applyLook({ ...look, ...r.look }); e.target.value = ''
             })} />
             {look.bg === 'foto' && (
               <div className="mt-3 space-y-2">
                 <label className="label" htmlFor="dim">Quanto schiarire la foto</label>
-                <input id="dim" type="range" min="10" max="90" className="w-full accent-[rgb(var(--accent))]" value={dim}
-                  onChange={(e) => { const v = Number(e.target.value); setDim(v); setBackgroundDim(v); applyLook() }} />
+                <input id="dim" type="range" min="10" max="90" className="w-full accent-[rgb(var(--accent))]" value={look.dim ?? 55}
+                  onChange={(e) => changeLook({ dim: Number(e.target.value) })} />
                 <label className="label" htmlFor="cardA">Trasparenza delle schede</label>
-                <input id="cardA" type="range" min="25" max="100" className="w-full accent-[rgb(var(--accent))]" value={cardA}
-                  onChange={(e) => { const v = Number(e.target.value); setCardA(v); setCardOpacity(v); applyLook() }} />
+                <input id="cardA" type="range" min="25" max="100" className="w-full accent-[rgb(var(--accent))]" value={look.card ?? 62}
+                  onChange={(e) => changeLook({ card: Number(e.target.value) })} />
                 <div className="flex gap-4 text-sm font-semibold text-accent">
                   <button onClick={() => photoRef.current.click()}>Cambia foto</button>
-                  <button onClick={() => { removeBackgroundPhoto(); setHasFoto(false); changeLook({ bg: 'nessuno' }) }}>Rimuovi</button>
+                  <button onClick={run(async () => { await api.del('/me/background'); removeBackgroundPhoto(); setHasFoto(false); changeLook({ bg: 'nessuno', bgv: undefined }, false) })}>Rimuovi</button>
                 </div>
-                <p className="text-xs text-mute">La foto resta solo su questo dispositivo.</p>
+                <p className="text-xs text-mute">La foto è legata al tuo account: la ritrovi su ogni dispositivo.</p>
               </div>
             )}
           </div>

@@ -43,3 +43,23 @@ async def test_ricettario(duo):
     assert len((await c.get("/api/recipes", headers=H(b))).json()) == 1
     # eliminazione multipla
     assert (await c.post("/api/bulk/recipes/delete", headers=H(a), json={"ids": [rec["id"]]})).status_code == 200
+
+
+async def test_sfondo_sincronizzato(duo):
+    c, a, b = duo
+    foto = "data:image/jpeg;base64," + "A" * 1000
+    r = (await c.put("/api/me/background", headers=H(a), json={"photo": foto})).json()
+    assert r["bgv"] and r["look"]["bg"] == "foto"
+    me = (await c.get("/api/me", headers=H(a))).json()
+    assert me["look"]["bgv"] == r["bgv"] and "bg_photo" not in me and foto not in str(me)
+    assert (await c.get("/api/me/background", headers=H(a))).json() == {"photo": foto, "bgv": r["bgv"]}
+    # luminosità e trasparenza viaggiano col profilo
+    p = await c.patch("/api/me", headers=H(a), json={"look": {"hue": 20, "bg": "foto", "dim": 40, "card": 70, "bgv": r["bgv"]}})
+    assert p.json()["look"]["dim"] == 40 and p.json()["look"]["card"] == 70
+    assert (await c.patch("/api/me", headers=H(a), json={"look": {"hue": 20, "bg": "foto", "dim": 5}})).status_code == 422
+    assert (await c.put("/api/me/background", headers=H(a), json={"photo": "data:text/html;base64,AA"})).status_code == 422
+    # il partner non vede la foto altrui
+    assert (await c.get("/api/me/background", headers=H(b))).json()["photo"] is None
+    d = (await c.delete("/api/me/background", headers=H(a))).json()
+    assert d["look"]["bg"] == "nessuno" and "bgv" not in d["look"]
+    assert (await c.get("/api/me/background", headers=H(a))).json()["photo"] is None
