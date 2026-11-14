@@ -113,3 +113,15 @@ async def test_recupero_password_con_codice_del_partner(duo):
         await c.post("/api/auth/reset", json={**body, "code": "SBAGLIAT"})
     assert (await c.post("/api/auth/reset", json={**body, "code": code})).status_code == 400
     assert (await c.post("/api/auth/reset-code")).status_code in (401, 403)
+
+
+async def test_notifica_di_prova_riporta_l_esito(duo, monkeypatch):
+    c, a, b = duo
+    assert (await c.post("/api/push/test", headers=H(a))).json() == {"devices": 0, "results": []}
+    await c.post("/api/push/subscribe", headers=H(a), json=SUB)
+    monkeypatch.setattr(push, "_send", lambda *x: None)
+    r = (await c.post("/api/push/test", headers=H(a))).json()
+    assert r["devices"] == 1 and r["results"][0]["ok"] and r["results"][0]["host"] == "push.example.com"
+    monkeypatch.setattr(push, "_send", lambda *x: 403)
+    r = (await c.post("/api/push/test", headers=H(a))).json()
+    assert not r["results"][0]["ok"] and r["results"][0]["status"] == 403

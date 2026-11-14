@@ -44,6 +44,7 @@ export default function Settings() {
   useEffect(() => { pushState().then(setPush).catch(() => setPush('unsupported')) }, [])
   const togglePush = run(async (v) => { if (v) await enablePush(); else await disablePush(); setPush(await pushState()) })
   const [rc, setRc] = useState(null)
+  const [pt, setPt] = useState(null)
   const me = couple.members.find((m) => m.id === user.id)
   const notif = user.notifications
 
@@ -104,6 +105,11 @@ export default function Settings() {
         <Row title="Su questo dispositivo" hint={push === 'unsupported' ? (isIOS() && !isStandalone() ? 'Su iPhone: Condividi → «Aggiungi a Home», poi riapri l\'app da lì' : 'Non supportato da questo browser') : push === 'denied' ? 'Bloccate: abilitale dalle impostazioni del browser' : 'Ricevi promemoria anche ad app chiusa'}>
           <Toggle label="Notifiche su questo dispositivo" checked={push === 'on'} disabled={push === 'unsupported' || push === 'denied' || push === '...'} onChange={togglePush} />
         </Row>
+        {push === 'on' && (
+          <Row title="Prova le notifiche" hint={pt ? (pt.devices === 0 ? 'Nessun dispositivo registrato: spegni e riaccendi l\'interruttore' : pt.results.map((r) => `${r.host.includes('apple') ? 'iPhone' : r.host.includes('google') ? 'Android' : r.host}: ${r.ok ? 'inviata ✓' : `errore ${r.status} ${r.error}`}`).join(' · ')) : 'Invia una notifica a questo e agli altri tuoi dispositivi'}>
+            <button className="btn-soft !px-4 !py-2" onClick={run(async () => setPt(await api.post('/push/test')))}>Invia</button>
+          </Row>
+        )}
         {Object.entries(NOTIFS).map(([k, l]) => (
           <Row key={k} title={l}>
             <Toggle label={l} disabled={!notif.master} checked={notif.types[k]}

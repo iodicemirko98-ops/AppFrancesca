@@ -2,6 +2,7 @@
 import asyncio
 import base64
 import json
+import logging
 
 from cryptography.hazmat.primitives import serialization
 from fastapi import APIRouter, Depends, HTTPException
@@ -42,13 +43,33 @@ def public_key_b64(v: Vapid) -> str:
     return base64.urlsafe_b64encode(raw).rstrip(b"=").decode()
 
 
+log = logging.getLogger("noidue.push")
+LAST_ERROR = {"text": ""}
+SUBJECT = "https://app-francesca.vercel.app"  # Apple rifiuta soggetti non validi (es. mailto: con dominio inesistente)
+
+
 def _send(sub: dict, payload: str, vapid: Vapid):
+    """Invia una notifica. Restituisce None se ok, altrimenti lo status HTTP (0/-1 se sconosciuto)."""
     from pywebpush import WebPushException, webpush
+    LAST_ERROR["text"] = ""
     try:
-        webpush(subscription_info=sub, data=payload, vapid_private_key=vapid, vapid_claims={"sub": "mailto:noreply@noidue.invalid"}, ttl=86400, timeout=10)
+        webpush(subscription_info=sub, data=payload, vapid_private_key=vapid, vapid_claims={"sub": SUBJECT}, ttl=86400, timeout=10,
+                headers={"Urgency": "high"})
         return None
     except WebPushException as e:
-        return getattr(e.response, "status_code", None) or 0
+        code = getattr(e.response, "status_code", None) or 0
+        body = ""
+        try:
+            body = e.response.text[:200]
+        except Exception:
+            pass
+        LAST_ERROR["text"] = f"{code} {body or e}"
+        log.warning("push rifiutato: %s", LAST_ERROR["text"])
+        return code
+    except Exception as e:  # noqa: BLE001
+        LAST_ERROR["text"] = f"{type(e).__name__}: {e}"
+        log.exception("push non inviato")
+        return -1
 
 
 async def push_user(user_id: str, title: str, body: str, url: str = "/", tag: str | None = None):
@@ -101,3 +122,23 @@ async def unsubscribe(body: UnsubIn, c: dict = Depends(ctx)):
 @router.get("/status")
 async def status(c: dict = Depends(ctx)):
     return {"devices": await get_db().push_subs.count_documents({"user_id": c["user"]["_id"]})}
+
+
+@router.post("/test")
+async def test_push(c: dict = Depends(ctx)):
+    """Notifica di prova a tutti i dispositivi dell'utente, con l'esito vero di ogni invio."""
+    db = get_db()
+    subs = [x async for x in db.push_subs.find({"user_id": c["user"]["_id"]})]
+    if not subs:
+        return {"devices": 0, "results": []}
+    vapid = await get_vapid()
+    payload = json.dumps({"title": "NoiDue", "body": "Prova riuscita: le notifiche funzionano ✅", "url": "/", "tag": "prova"})
+    loop = asyncio.get_running_loop()
+    results = []
+    for x in subs:
+        st = await loop.run_in_executor(None, _send, {"endpoint": x["endpoint"], "keys": x["keys"]}, payload, vapid)
+        host = x["endpoint"].split("/")[2]
+        results.append({"host": host, "ok": st is None, "status": st, "error": LAST_ERROR["text"] if st is not None else ""})
+        if st in (404, 410):
+            await db.push_subs.delete_one({"_id": x["_id"]})
+    return {"devices": len(subs), "results": results}
