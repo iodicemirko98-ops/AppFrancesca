@@ -92,6 +92,7 @@ export function TriviaMatch() {
   const [cats, setCats] = useState([])
   const [idx, setIdx] = useState(null)
   const [fb, setFb] = useState(null) // {choice, right, points}
+  const [picked, setPicked] = useState(null) // scelta immediata, prima della risposta del server
   const [left, setLeft] = useState(TIME_MS)
   const t0 = useRef(0)
   const lock = useRef(false)
@@ -102,17 +103,17 @@ export function TriviaMatch() {
   const playing = data && idx !== null && idx < data.total
   // timer: riparte a ogni nuova domanda
   useEffect(() => {
-    if (!playing || fb) return
+    if (!playing || fb || picked) return
     t0.current = Date.now(); setLeft(TIME_MS)
     const t = setInterval(() => {
       const l = TIME_MS - (Date.now() - t0.current)
       if (l <= 0) { clearInterval(t); setLeft(0); submit(null) } else setLeft(l)
     }, 100)
     return () => clearInterval(t)
-  }, [playing, idx, fb]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [playing, idx, fb, picked]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const next = async (done) => {
-    setFb(null); lock.current = false
+    setFb(null); setPicked(null); lock.current = false
     if (done) await reload()
     setIdx((i) => i + 1)
   }
@@ -121,12 +122,13 @@ export function TriviaMatch() {
     if (lock.current) return
     lock.current = true
     const ms = Date.now() - t0.current
+    setPicked({ choice })
     try {
       const r = await api.post(`/trivia/matches/${id}/answer`, { q: idx, choice, ms })
       setFb({ choice, right: r.right, points: r.points, fact: r.fact, done: r.done })
       if (!r.fact) setTimeout(next, 1300, r.done)
     } catch (e) {
-      lock.current = false
+      lock.current = false; setPicked(null)
       if (e.status === 409) { await reload(); setIdx(null) } else showToast(e.message)
     }
   }
@@ -154,12 +156,13 @@ export function TriviaMatch() {
             <h1 className="display text-[1.7rem] leading-snug">{q.q}</h1></div>
           <div className="space-y-2">
             {q.options.map((o, i) => {
-              const state = !fb ? '' : i === fb.right ? 'ring-2 ring-green-600 bg-green-500/15' : i === fb.choice ? 'ring-2 ring-red-500 bg-red-500/15' : 'opacity-50'
+              const state = !fb ? (picked?.choice === i ? 'ring-2 ring-accent bg-accent/15' : picked ? 'opacity-60' : '') : i === fb.right ? 'ring-2 ring-green-600 bg-green-500/15' : i === fb.choice ? 'ring-2 ring-red-500 bg-red-500/15' : 'opacity-50'
               return (
-                <button key={i} disabled={!!fb} onClick={() => submit(i)}
+                <button key={i} disabled={!!fb || !!picked} onClick={() => submit(i)}
                   className={`card flex w-full items-center gap-3 !rounded-2xl !p-4 text-left font-medium ${state}`}>
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-soft text-sm font-bold">{'ABCD'[i]}</span>
                   <span className="flex-1">{o}</span>
+                  {!fb && picked?.choice === i && <span className="h-4 w-4 animate-spin rounded-full border-2 border-accent border-t-transparent" aria-label="Invio" />}
                   {fb && i === fb.right && <Check size={20} className="text-green-600" />}
                   {fb && i === fb.choice && i !== fb.right && <X size={20} className="text-red-500" />}
                 </button>
