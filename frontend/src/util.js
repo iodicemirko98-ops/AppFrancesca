@@ -33,3 +33,6 @@ export function downloadBlob(blob, filename) {
   a.click()
   setTimeout(() => URL.revokeObjectURL(a.href), 2000)
 }
+
+export const eur = (n) => Number(n).toLocaleString('it-IT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 })
+export const fmtShort = (iso) => (iso ? new Date(iso.slice(0, 10) + 'T12:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'short' }) : '')

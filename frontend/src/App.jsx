@@ -19,6 +19,12 @@ import Desideri from './pages/Desideri'
 import BuonoASapersi from './pages/BuonoASapersi'
 import Note from './pages/Note'
 import Viaggi from './pages/Viaggi'
+import Risparmi from './pages/Risparmi'
+import Spese from './pages/Spese'
+import Cassaforte from './pages/Cassaforte'
+import Disegno from './pages/Disegno'
+import Ciclo from './pages/Ciclo'
+import Anno from './pages/Anno'
 
 const Tab = ({ to, icon: Icon, label, active }) => (
   <NavLink to={to} end={to === '/'} className={({ isActive }) => `flex flex-1 flex-col items-center gap-0.5 rounded-2xl py-2 text-[11px] font-medium transition ${(active ?? isActive) ? 'bg-accent/15 text-accent' : 'text-mute'}`}>
@@ -61,6 +67,12 @@ export default function App() {
           {on('buono_a_sapersi') && <Route path="/buono-a-sapersi" element={<BuonoASapersi />} />}
           {on('note') && <Route path="/note" element={<Note />} />}
           {on('viaggi') && <Route path="/viaggi" element={<Viaggi />} />}
+          {on('risparmi') && <Route path="/risparmi" element={<Risparmi />} />}
+          {on('spese') && <Route path="/spese" element={<Spese />} />}
+          {on('cassaforte') && <Route path="/cassaforte" element={<Cassaforte />} />}
+          {on('disegno') && <Route path="/disegno" element={<Disegno />} />}
+          {couple.modules?.ciclo === true && <Route path="/ciclo" element={<Ciclo />} />}
+          {on('anno') && <Route path="/anno" element={<Anno />} />}
           <Route path="/notifiche" element={<Notifications />} />
           <Route path="/cestino" element={<Trash />} />
           <Route path="/altro" element={<More />} />

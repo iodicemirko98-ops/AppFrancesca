@@ -3,6 +3,10 @@ const BASE = import.meta.env.VITE_API_URL || ''
 export const getToken = () => localStorage.getItem('token')
 export const setToken = (t) => (t ? localStorage.setItem('token', t) : localStorage.removeItem('token'))
 
+let vaultToken = null
+export const setVaultToken = (t) => { vaultToken = t }
+export const hasVaultToken = () => !!vaultToken
+
 export class ApiError extends Error {
   constructor(status, message) {
     super(message)
@@ -18,6 +22,7 @@ async function request(method, path, body) {
       headers: {
         ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
         ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}),
+        ...(vaultToken && path.startsWith('/vault') ? { 'X-Vault-Token': vaultToken } : {}),
       },
       body: body !== undefined ? JSON.stringify(body) : undefined,
     })

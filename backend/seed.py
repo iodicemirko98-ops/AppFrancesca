@@ -125,6 +125,31 @@ async def main():
         trip("Parigi", "Francia", 48.86, 2.35, "2026-03"), trip("Lisbona", "Portogallo", 38.72, -9.14, "2025-12", "Il tram 28"),
         trip("Verona", "Italia", 45.44, 10.99, "2026-05"), trip("Roma", "Italia", 41.9, 12.5, "2026-01"), trip("Napoli", "Italia", 40.85, 14.27, "2025-11"),
     ])
-    print("Fatto: Marco e Giulia, insieme da 413 giorni.")
+    cents = lambda x: int(round(x * 100))
+    goal = lambda name, target, deps, deadline=None: {"_id": uuid.uuid4().hex, **base, "name": name, "target_cents": cents(target), "deadline": deadline,
+        "emoji": None, "created_by": M, "deposits": [{"id": uuid.uuid4().hex, "cents": cents(a), "by": by, "date": d(-n), "note": note, "created_at": now()} for a, by, n, note in deps]}
+    await db.goals.insert_many([
+        goal("Vacanza in Giappone", 3000, [(600, M, 70, "Tredicesima"), (400, G, 40, None), (250, M, 12, None), (300, G, 3, "Bonus")], deadline=d(240)),
+        goal("Divano nuovo", 1200, [(1200, M, 30, None)]),
+        goal("Fondo emergenze", 5000, [(800, M, 90, None), (700, G, 60, None)]),
+    ])
+    exp = lambda title, amount, by, cat, n, split="equal": {"_id": uuid.uuid4().hex, **base, "title": title, "amount_cents": cents(amount), "paid_by": by,
+        "date": d(-n), "category": cat, "split": split, "created_by": by}
+    await db.expenses.insert_many([
+        exp("Affitto", 850, M, "casa", 9), exp("Spesa al supermercato", 110.9, G, "spesa", 4), exp("Bolletta della luce", 64.2, M, "bollette", 6),
+        exp("Cena da Luigi", 57, G, "uscite", 2), exp("Regalo per la mamma di Giulia", 45, M, "regali", 5, "other"), exp("Treno per Firenze", 96, M, "viaggi", 8),
+        exp("Detersivi", 20, G, "altro", 1),
+    ])
+    from cryptography.fernet import Fernet
+    from app.routes_private import fernet
+    vault = lambda label, secret, kind, notes=None: {"_id": uuid.uuid4().hex, "couple_id": cid, "label": label, "kind": kind, "notes": notes,
+        "secret_enc": fernet().encrypt(secret.encode()).decode(), "created_by": M, "created_at": now()}
+    await db.vault.insert_many([vault("Codice dell'allarme", "7741#", "codice"), vault("Wi-Fi del condominio", "ospiti-2026", "accesso", "Scala B")])
+    await db.users.update_many({}, {"$set": {"vault_pin_hash": hash_password("1234")}})  # PIN di prova: 1234
+    await db.drawings.insert_one({"_id": uuid.uuid4().hex, **base, "name": "Il nostro gatto", "created_by": M, "updated_at": now(), "strokes": [
+        {"id": "a1", "color": "#C2603F", "size": 0.02, "eraser": False, "by": M, "pts": [[.3, .6], [.3, .45], [.4, .4], [.5, .45], [.5, .6], [.3, .6]]},
+        {"id": "a2", "color": "#2B211C", "size": 0.012, "eraser": False, "by": G, "pts": [[.33, .38], [.3, .28], [.38, .33]]},
+        {"id": "a3", "color": "#2B211C", "size": 0.012, "eraser": False, "by": G, "pts": [[.47, .38], [.5, .28], [.42, .33]]}]})
+    print("Fatto: Marco e Giulia, insieme da 413 giorni. PIN della cassaforte: 1234.")
 
 asyncio.run(main())

@@ -12,12 +12,12 @@ export const SECTIONS = [
   { key: 'buono_a_sapersi', path: '/buono-a-sapersi', label: 'Buono a sapersi', icon: Lightbulb, ready: true },
   { key: 'note', path: '/note', label: 'Note e capsule', icon: StickyNote, ready: true },
   { key: 'viaggi', path: '/viaggi', label: 'Viaggi', icon: MapPin, ready: true },
-  { key: 'risparmi', path: '/risparmi', label: 'Risparmi', icon: PiggyBank, ready: false },
-  { key: 'spese', path: '/spese', label: 'Spese comuni', icon: Wallet, ready: false },
-  { key: 'cassaforte', path: '/cassaforte', label: 'Cassaforte', icon: Lock, ready: false },
-  { key: 'disegno', path: '/disegno', label: 'Disegno condiviso', icon: Brush, ready: false },
-  { key: 'ciclo', path: '/ciclo', label: 'Ciclo', icon: Flower2, ready: false },
-  { key: 'anno', path: '/anno', label: 'Il nostro anno', icon: Sparkles, ready: false },
+  { key: 'risparmi', path: '/risparmi', label: 'Risparmi', icon: PiggyBank, ready: true },
+  { key: 'spese', path: '/spese', label: 'Spese comuni', icon: Wallet, ready: true },
+  { key: 'cassaforte', path: '/cassaforte', label: 'Cassaforte', icon: Lock, ready: true },
+  { key: 'disegno', path: '/disegno', label: 'Disegno condiviso', icon: Brush, ready: true },
+  { key: 'ciclo', path: '/ciclo', label: 'Ciclo', icon: Flower2, ready: true },
+  { key: 'anno', path: '/anno', label: 'Il nostro anno', icon: Sparkles, ready: true },
 ]
 export const UTILITY = [
   { path: '/notifiche', label: 'Notifiche', icon: Bell },

@@ -17,6 +17,11 @@ solo a chi le scrive), buono a sapersi (taglie, gusti, codici…), note, capsule
 data scelta) e storie, viaggi con mappa e diario. La ricerca dei luoghi usa OpenStreetMap (Nominatim) dal tuo browser: è
 l'unica richiesta a un servizio esterno dell'app, insieme ai riquadri della mappa.
 
+**Fase 5** — risparmi (obiettivi con versamenti e prelievi), spese comuni (saldo del mese, per categoria, «Salda»), cassaforte
+(PIN personale, contenuti cifrati nel database, si richiude da sola), disegno condiviso (i tratti compaiono subito all'altro),
+ciclo (privato, spento di default: il partner vede solo un riassunto se scegli di condividerlo) e il riepilogo «Il nostro anno».
+Per la cassaforte puoi impostare `VAULT_KEY` su Render: se non c'è si usa `JWT_SECRET`, e cambiarlo dopo renderebbe illeggibili i contenuti.
+
 **Grafica** — serif Cormorant + Outfit (inclusi nell'app, nessuna richiesta a servizi esterni), icone a linea, barra a pillola.
 Le fasi successive si aggiungono sopra questa base.
 

@@ -15,7 +15,7 @@ const Item = ({ to, icon: Icon, label, badge }) => (
 
 export default function More() {
   const { couple, home } = useApp()
-  const extra = SECTIONS.filter((s) => !s.nav && s.ready && couple.modules?.[s.key] !== false)
+  const extra = SECTIONS.filter((s) => !s.nav && s.ready && (s.key === 'ciclo' ? couple.modules?.ciclo === true : couple.modules?.[s.key] !== false))
   return (
     <div className="space-y-6">
       <PageHeader eyebrow="Tutto il resto" title="Altro" />

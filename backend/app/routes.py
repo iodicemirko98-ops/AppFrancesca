@@ -11,6 +11,7 @@ from .db import get_db
 from .routes_planner import home_data
 from .routes_together import question_summary
 from .routes_memories import last_note, release_capsules
+from .realtime import emit
 from .security import create_token, current_user, hash_password, verify_password
 
 router = APIRouter(prefix="/api")
@@ -150,6 +151,7 @@ async def attach_to_couple(user: dict, code: str) -> dict:
                 await db.couples.update_one({"_id": target["_id"]}, {"$set": {"start_date": old["start_date"]}})
 
     await db.couples.update_one({"_id": target["_id"]}, {"$push": {"members": user["_id"]}})
+    await emit(target["_id"], "couple", "updated", None, user["_id"])
     await db.users.update_one({"_id": user["_id"]}, {"$set": {"couple_id": target["_id"]}})
     return await db.couples.find_one({"_id": target["_id"]})
 
@@ -236,6 +238,8 @@ async def update_me(body: ProfileIn, user: dict = Depends(current_user)):
         update["notifications"] = {"master": bool(body.notifications.get("master", current["master"])), "types": types}
     if update:
         await get_db().users.update_one({"_id": user["_id"]}, {"$set": update})
+    if user.get("couple_id"):
+        await emit(user["couple_id"], "couple", "updated", None, user["_id"])
     return public_user(await get_db().users.find_one({"_id": user["_id"]}))
 
 
@@ -253,6 +257,8 @@ async def delete_me(body: DeleteIn, user: dict = Depends(current_user)):
             for coll in logic.COUPLE_COLLECTIONS:
                 await db[coll].delete_many({"couple_id": couple["_id"]})
             await db.couples.delete_one({"_id": couple["_id"]})
+    await db.cycle.delete_many({"user_id": user["_id"]})
+    await db.cycle_settings.delete_many({"user_id": user["_id"]})
     await db.users.delete_one({"_id": user["_id"]})
 
 
@@ -280,6 +286,7 @@ async def update_couple(body: CoupleIn, user: dict = Depends(current_user)):
         update["modules"] = {**couple.get("modules", {}), **{k: v for k, v in body.modules.items() if k in logic.MODULES}}
     if update:
         await get_db().couples.update_one({"_id": couple["_id"]}, {"$set": update})
+        await emit(couple["_id"], "couple", "updated", None, user["_id"])
     return await public_couple(await user_couple(user))
 
 
@@ -315,4 +322,7 @@ async def export(user: dict = Depends(current_user)):
     data = {"exported_at": now(), "user": public_user(user), "couple": await public_couple(couple)}
     for coll in logic.COUPLE_COLLECTIONS:
         data[coll] = [d async for d in db[coll].find({"couple_id": couple["_id"]})]
+    for d in data.get("vault", []):  # i segreti restano cifrati nel database: non si esportano
+        d.pop("secret_enc", None)
+    data["cycle"] = [d async for d in db.cycle.find({"user_id": user["_id"]})]  # solo i propri dati
     return data
