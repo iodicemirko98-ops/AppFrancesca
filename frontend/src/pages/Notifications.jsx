@@ -24,7 +24,7 @@ export default function Notifications() {
       <PageHeader eyebrow="Per te" title="Notifiche" action={<Link to="/" aria-label="Indietro" className="icon-btn-soft"><ChevronLeft size={20} /></Link>} />
       {data === null ? <p className="text-mute">Un attimo…</p> : data.items.length === 0 ? <div className="card text-center text-mute">Nessuna notifica, per ora. 🌿</div> : (
         <div className="space-y-2">{data.items.map((n) => (
-          <Link key={n.id} to={n.link || '/'} className={`block rounded-2xl px-4 py-3 ${n.read ? 'bg-card ring-1 ring-line' : 'bg-accent/12 ring-1 ring-accent/40'}`}>
+          <Link key={n.id} to={n.link || '/'} className={`block rounded-2xl px-4 py-3 ${n.read ? 'bg-card ring-1 ring-line' : 'bg-accent/15 ring-1 ring-accent/40'}`}>
             <div>{n.text}</div><div className="text-xs text-mute">{when(n.created_at)}</div>
           </Link>))}</div>
       )}

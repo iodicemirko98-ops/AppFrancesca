@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Bell, Sparkles, ChevronRight, MessageCircleQuestion } from 'lucide-react'
+import { Bell, Sparkles, ChevronRight, MessageCircleQuestion, StickyNote } from 'lucide-react'
 import { useApp } from '../state'
 import { Avatar } from '../components/ui'
 import MilestoneCard from '../components/MilestoneCard'
@@ -88,6 +88,14 @@ export default function Home() {
           <p className="display mt-2 text-2xl leading-snug">{home.daily_question.question}</p>
           <p className="mt-3 flex items-center gap-2 text-sm text-mute"><MessageCircleQuestion size={16} strokeWidth={1.6} />
             {home.daily_question.answered ? (home.daily_question.partner_answered ? 'Avete risposto entrambi: leggete le risposte' : 'Hai risposto. Aspettiamo il partner') : home.daily_question.partner_answered ? 'Il partner ha già risposto: tocca a te' : 'Rispondi: le risposte restano segrete finché non rispondete entrambi'}</p>
+        </Link>
+      )}
+
+      {couple.modules?.note !== false && home.last_note && (
+        <Link to="/note" className="card flex items-center gap-4 !p-4">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent/15 text-accent"><StickyNote size={20} strokeWidth={1.6} /></span>
+          <span className="min-w-0 flex-1"><span className="eyebrow block">Ultima {home.last_note.kind === 'storia' ? 'storia' : 'nota'}</span><span className="display block truncate text-xl">{home.last_note.title}</span></span>
+          <ChevronRight size={18} className="text-mute" />
         </Link>
       )}
 

@@ -14,7 +14,8 @@ router = APIRouter(prefix="/api")
 
 TRASH_DAYS = 7
 NUDGE_COOLDOWN_S = 20
-TRASHABLE = {"events": "evento", "tasks": "attività", "lists": "lista", "polls": "decisione", "bucket": "idea da fare insieme"}
+TRASHABLE = {"events": "evento", "tasks": "attività", "lists": "lista", "polls": "decisione", "bucket": "idea da fare insieme",
+             "wishes": "desiderio", "facts": "informazione", "notes": "nota", "trips": "luogo"}
 
 
 def now() -> str:
@@ -471,7 +472,7 @@ async def clear_done(id: str, c: dict = Depends(ctx)):
 
 # ================= CESTINO =================
 def title_of(coll: str, d: dict) -> str:
-    return d.get("title") or d.get("name") or "Senza titolo"
+    return d.get("title") or d.get("name") or d.get("label") or "Senza titolo"
 
 
 async def purge_old(c: dict):

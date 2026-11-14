@@ -27,7 +27,7 @@ export function ListsPage() {
       {data === null ? <p className="text-mute">Un attimo…</p> : data.length === 0 ? <div className="card text-center text-mute">Nessuna lista ancora.<br />Create la prima: spesa, film da vedere, idee di viaggio…</div> : (
         <div className="space-y-2">{data.map((l) => (
           <Link key={l.id} to={`/liste/${l.id}`} className="card flex items-center gap-4 !p-4">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/12 text-accent"><KIcon kind={l.kind} /></span>
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/15 text-accent"><KIcon kind={l.kind} /></span>
             <span className="min-w-0 flex-1"><span className="display block truncate text-xl">{l.name}</span><span className="text-sm text-mute">{l.total === 0 ? 'Vuota' : `${l.done_count} di ${l.total} fatte`}</span></span>
             <ChevronRight size={18} className="text-mute" />
           </Link>))}</div>

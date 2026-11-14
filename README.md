@@ -12,6 +12,11 @@ sincronizzazione in tempo reale tra i due telefoni (WebSocket).
 (sondaggi a voto segreto, sorteggio in caso di pareggio, sorteggio rapido) e da fare insieme (lista di cose da vivere,
 con ricordo dopo averle fatte e "cosa facciamo?" casuale).
 
+**Fase 4** — desideri con radar regali (chi regala può prenotare in segreto, chi riceve non lo vede mai; idee segrete visibili
+solo a chi le scrive), buono a sapersi (taglie, gusti, codici…), note, capsule del tempo (sigillate per entrambi fino alla
+data scelta) e storie, viaggi con mappa e diario. La ricerca dei luoghi usa OpenStreetMap (Nominatim) dal tuo browser: è
+l'unica richiesta a un servizio esterno dell'app, insieme ai riquadri della mappa.
+
 **Grafica** — serif Cormorant + Outfit (inclusi nell'app, nessuna richiesta a servizi esterni), icone a linea, barra a pillola.
 Le fasi successive si aggiungono sopra questa base.
 

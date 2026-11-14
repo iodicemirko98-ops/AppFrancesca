@@ -6,7 +6,7 @@ import { SECTIONS, UTILITY } from '../modules'
 
 const Item = ({ to, icon: Icon, label, badge }) => (
   <Link to={to} className="flex items-center gap-4 px-1 py-3.5">
-    <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent/12 text-accent"><Icon size={20} strokeWidth={1.7} /></span>
+    <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent/15 text-accent"><Icon size={20} strokeWidth={1.7} /></span>
     <span className="flex-1 font-medium">{label}</span>
     {badge > 0 && <span className="rounded-full bg-accent px-2 text-xs font-semibold text-accent-ink">{badge}</span>}
     <ChevronRight size={18} className="text-mute" />

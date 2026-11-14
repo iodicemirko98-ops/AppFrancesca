@@ -76,7 +76,7 @@ function Coin() {
       <label className="label" htmlFor="sorte">Scrivi le opzioni, una per riga (o separate da virgola)</label>
       <textarea id="sorte" className="input" rows={4} value={text} onChange={(e) => { setText(e.target.value); setPick(null) }} placeholder={'Pizza\nSushi\nTacos'} />
       <button className="btn w-full" disabled={text.split(/[\n,]/).filter((s) => s.trim()).length < 2}><Shuffle size={18} className="mr-2" />Sorteggia</button>
-      {pick && <div className="rounded-3xl bg-accent/12 p-5 text-center"><div className="eyebrow">Ha deciso la sorte</div><div className="display mt-1 text-4xl text-accent">{pick}</div></div>}
+      {pick && <div className="rounded-3xl bg-accent/15 p-5 text-center"><div className="eyebrow">Ha deciso la sorte</div><div className="display mt-1 text-4xl text-accent">{pick}</div></div>}
     </form>
   )
 }

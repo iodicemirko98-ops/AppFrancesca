@@ -15,6 +15,10 @@ import Trash from './pages/Trash'
 import Domanda from './pages/Domanda'
 import Decidere from './pages/Decidere'
 import FareInsieme from './pages/FareInsieme'
+import Desideri from './pages/Desideri'
+import BuonoASapersi from './pages/BuonoASapersi'
+import Note from './pages/Note'
+import Viaggi from './pages/Viaggi'
 
 const Tab = ({ to, icon: Icon, label, active }) => (
   <NavLink to={to} end={to === '/'} className={({ isActive }) => `flex flex-1 flex-col items-center gap-0.5 rounded-2xl py-2 text-[11px] font-medium transition ${(active ?? isActive) ? 'bg-accent/15 text-accent' : 'text-mute'}`}>
@@ -53,6 +57,10 @@ export default function App() {
           {on('domanda') && <Route path="/domanda" element={<Domanda />} />}
           {on('decidere') && <Route path="/decidere" element={<Decidere />} />}
           {on('fare_insieme') && <Route path="/fare-insieme" element={<FareInsieme />} />}
+          {on('desideri') && <Route path="/desideri" element={<Desideri />} />}
+          {on('buono_a_sapersi') && <Route path="/buono-a-sapersi" element={<BuonoASapersi />} />}
+          {on('note') && <Route path="/note" element={<Note />} />}
+          {on('viaggi') && <Route path="/viaggi" element={<Viaggi />} />}
           <Route path="/notifiche" element={<Notifications />} />
           <Route path="/cestino" element={<Trash />} />
           <Route path="/altro" element={<More />} />

@@ -94,6 +94,37 @@ async def main():
         bk("Picnic al tramonto", "natura", done=True, on=d(-20), memory="Con le zanzare, ma bellissimo."),
         bk("Fare il giro dei mercatini di Natale", "esperienze", done=True, on=d(-60), memory="Vin brulé e mani gelate."),
     ])
+    wish = lambda title, owner, price=None, secret=False, by=None, claimed=None, notes=None: {"_id": uuid.uuid4().hex, **base,
+        "title": title, "url": None, "price": price, "notes": notes, "owner": owner, "secret": secret, "added_by": by or owner,
+        "claimed_by": claimed, "received": False}
+    await db.wishes.insert_many([
+        wish("Cuffie wireless", M, 129.9), wish("Zaino da trekking", M, 89, notes="Quello verde, 30 litri"),
+        wish("Libro di ricette siciliane", G, 24.5, claimed=M), wish("Piante grasse per il balcone", G, 30),
+        wish("Weekend a Siena", G, 250, secret=True, by=M, notes="Per il suo compleanno"),
+    ])
+    fact = lambda subj, cat, label, value: {"_id": uuid.uuid4().hex, **base, "subject": subj, "category": cat, "label": label, "value": value, "created_by": M}
+    await db.facts.insert_many([
+        fact(G, "taglie", "Scarpe", "38"), fact(G, "taglie", "Anello", "14"), fact(M, "taglie", "Scarpe", "43"),
+        fact(G, "gusti", "Fiore preferito", "Peonie"), fact(M, "gusti", "Gelato", "Pistacchio e nocciola"),
+        fact("both", "indirizzi", "Wi-Fi di casa", "gatto-felice-2026"), fact(G, "famiglia", "Compleanno della mamma", "12 marzo"),
+    ])
+    note = lambda kind, title, body, **k: {"_id": uuid.uuid4().hex, **base, "kind": kind, "title": title, "body": body, "pinned": k.get("pinned", False),
+        "unlock_on": k.get("unlock"), "on_date": k.get("on"), "created_by": k.get("by", M), "updated_at": now(), "released": False}
+    await db.notes.insert_many([
+        note("nota", "Idee per le cene della settimana", "Lunedì risotto, mercoledì pizza fatta in casa, venerdì fuori.", pinned=True),
+        note("nota", "Cose da ricordare per Siena", "Prenotare il parcheggio, portare le scarpe comode.", by=G),
+        note("capsula", "Per il nostro anniversario", "Quando leggerai questo avremo vissuto un altro anno insieme. Grazie di tutto.", unlock=d(60)),
+        note("storia", "Come ci siamo conosciuti", "A una festa di amici comuni: hai rovesciato il vino e abbiamo cominciato a ridere.", on=(start).isoformat()),
+        note("storia", "Il primo viaggio", "Lisbona, il tram 28 e i pastéis de nata. Ci siamo persi tre volte, e ci è piaciuto.", on=(start + timedelta(days=150)).isoformat()[:7], by=G),
+    ])
+    trip = lambda name, country, lat, lon, when, notes=None: {"_id": uuid.uuid4().hex, **base, "name": name, "country": country, "lat": lat, "lon": lon,
+        "when": when, "notes": notes, "created_by": M}
+    await db.trips.insert_many([
+        trip("Lago di Garda", "Italia", 45.6, 10.7, "2026-10", "Gita improvvisata in giornata, gelato sul lago"),
+        trip("Barcellona", "Spagna", 41.39, 2.17, "2026-08", "La Sagrada Família al tramonto"),
+        trip("Parigi", "Francia", 48.86, 2.35, "2026-03"), trip("Lisbona", "Portogallo", 38.72, -9.14, "2025-12", "Il tram 28"),
+        trip("Verona", "Italia", 45.44, 10.99, "2026-05"), trip("Roma", "Italia", 41.9, 12.5, "2026-01"), trip("Napoli", "Italia", 40.85, 14.27, "2025-11"),
+    ])
     print("Fatto: Marco e Giulia, insieme da 413 giorni.")
 
 asyncio.run(main())

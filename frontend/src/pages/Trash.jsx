@@ -7,7 +7,7 @@ import { useLive } from '../hooks'
 const left = (iso) => { const d = Math.max(0, Math.ceil((new Date(iso) - Date.now()) / 864e5)); return d <= 1 ? 'scade oggi' : `scade tra ${d} giorni` }
 
 export default function Trash() {
-  const { data, reload } = useLive('/trash', ['events', 'tasks', 'lists', 'polls', 'bucket'])
+  const { data, reload } = useLive('/trash', ['events', 'tasks', 'lists', 'polls', 'bucket', 'wishes', 'facts', 'notes', 'trips'])
   const restore = async (t) => { await api.post(`/trash/${t.collection}/${t.id}/restore`); reload() }
   const purge = async (t) => { await api.del(`/trash/${t.collection}/${t.id}`); reload() }
   const empty = async () => { await api.del('/trash'); reload() }

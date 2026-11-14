@@ -52,7 +52,7 @@ export function AppProvider({ children }) {
         const m = JSON.parse(e.data)
         if (m.entity === 'hello') return
         fire(m)
-        if (['notifications', 'tasks', 'events', 'answers'].includes(m.entity)) loadAll().catch(() => {})
+        if (['notifications', 'tasks', 'events', 'answers', 'notes'].includes(m.entity)) loadAll().catch(() => {})
       }
       ws.onclose = () => {
         clearInterval(ping)
