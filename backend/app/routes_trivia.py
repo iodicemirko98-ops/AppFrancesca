@@ -26,8 +26,7 @@ def points(ok: bool, ms: int) -> int:
 
 
 async def members_of(c: dict) -> list[str]:
-    couple = await get_db().couples.find_one({"_id": c["cid"]})
-    return couple["members"]
+    return c["couple"]["members"]  # già caricata da ctx: niente round-trip in più
 
 
 def player(m: dict, uid: str) -> dict:
@@ -170,14 +169,14 @@ async def answer(id: str, body: AnswerIn, c: dict = Depends(ctx)):
     upd = {"$push": {f"players.{me}.answers": entry}, "$inc": {f"players.{me}.score": pts}}
     if last:
         upd["$set"] = {f"players.{me}.done_at": now()}
-    await db.trivia_matches.update_one({"_id": id, f"players.{me}": {"$exists": False}},
-                                       {"$set": {f"players.{me}": {"answers": [], "score": 0, "done_at": None}}})
+    if me not in (m.get("players") or {}):  # solo chi è entrato dopo la creazione
+        await db.trivia_matches.update_one({"_id": id, f"players.{me}": {"$exists": False}},
+                                           {"$set": {f"players.{me}": {"answers": [], "score": 0, "done_at": None}}})
     # aggiornamento condizionato: la risposta vale solo se è davvero la prossima (niente doppi invii)
-    res = await db.trivia_matches.update_one({"_id": id, f"players.{me}.answers": {"$size": body.q}}, upd)
-    if res.matched_count == 0:
+    fresh = await db.trivia_matches.find_one_and_update({"_id": id, f"players.{me}.answers": {"$size": body.q}}, upd, return_document=True)
+    if fresh is None:
         raise HTTPException(409, "Domanda già risposta")
     members = await members_of(c)
-    fresh = await get_match(id, c)
     finished = all(is_done(fresh, u) for u in members)
     await changed(c, "trivia", "updated", id)
     if last and finished and c["partner_id"]:

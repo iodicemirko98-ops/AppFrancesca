@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime, timedelta
 
 import pytest
@@ -40,20 +41,29 @@ async def test_chiave_vapid_stabile_e_sottoscrizione(duo):
     assert (await c.get("/api/push/status", headers=H(a))).json() == {"devices": 0}
 
 
+async def drain():
+    from app.routes_planner import _BG
+    while _BG:
+        await asyncio.gather(*list(_BG))
+
+
 async def test_le_notifiche_partono_anche_in_push_e_rispettano_le_preferenze(duo, monkeypatch):
     c, a, b = duo
     sent = []
     monkeypatch.setattr(push, "_send", lambda sub, payload, vapid: sent.append((sub["endpoint"], payload)))
     await c.post("/api/push/subscribe", headers=H(b), json=SUB)
     await c.post("/api/tasks", headers=H(a), json={"title": "Bucato", "assignee": b["user"]["id"]})
+    await drain()
     assert len(sent) == 1 and "Bucato" in sent[0][1] and sent[0][0] == SUB["endpoint"]
     await c.patch("/api/me", headers=H(b), json={"notifications": {"master": True, "types": {"attivita": False}}})
     await c.post("/api/tasks", headers=H(a), json={"title": "Altro", "assignee": b["user"]["id"]})
+    await drain()
     assert len(sent) == 1  # disattivate per quel tipo: niente push
     # dispositivo scaduto → viene rimosso
     await c.patch("/api/me", headers=H(b), json={"notifications": {"master": True, "types": {"attivita": True}}})
     monkeypatch.setattr(push, "_send", lambda *a: 410)
     await c.post("/api/tasks", headers=H(a), json={"title": "Terzo", "assignee": b["user"]["id"]})
+    await drain()
     assert (await c.get("/api/push/status", headers=H(b))).json() == {"devices": 0}
 
 

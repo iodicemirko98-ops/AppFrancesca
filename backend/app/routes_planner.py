@@ -1,4 +1,5 @@
 """Fase 2: calendario, attività, liste, cestino, notifiche (tutto con sync in tempo reale)."""
+import asyncio
 import uuid
 from datetime import datetime, timedelta, timezone
 
@@ -36,6 +37,9 @@ async def ctx(user: dict = Depends(current_user)) -> dict:
     return {"user": user, "couple": couple, "cid": couple["_id"], "partner_id": partner_id}
 
 
+_BG: set = set()
+
+
 async def notify_to(cid: str, to: str, from_: str | None, ntype: str, text: str, link: str | None = None) -> bool:
     """Notifica in-app + push a un utente, rispettando le sue preferenze."""
     user = await get_db().users.find_one({"_id": to})
@@ -47,7 +51,10 @@ async def notify_to(cid: str, to: str, from_: str | None, ntype: str, text: str,
     await get_db().notifications.insert_one(doc)
     await emit(cid, "notifications", "new", doc["_id"], from_, only_user=to)
     from .push import push_user  # import tardivo: push.py usa questo modulo
-    await push_user(to, "NoiDue", text, link or "/", tag=ntype)
+    # il push (rete verso FCM/Apple) può richiedere secondi: non deve far aspettare chi sta giocando/scrivendo
+    t = asyncio.create_task(push_user(to, "NoiDue", text, link or "/", tag=ntype))
+    _BG.add(t)
+    t.add_done_callback(_BG.discard)
     return True
 
 
