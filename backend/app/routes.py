@@ -51,11 +51,27 @@ class JoinIn(BaseModel):
     invite_code: str
 
 
+LOOK_BG = ('nessuno', 'sfumatura', 'aloni', 'puntini', 'foto')
+
+
 class ProfileIn(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=40)
     photo: str | None = None  # data URL; stringa vuota = rimuovi
     theme: str | None = None  # chiaro | scuro | auto
     notifications: dict | None = None
+    look: dict | None = None  # {"hue": 0-360 | None, "bg": "nessuno|sfumatura|aloni|puntini|foto"}
+
+    @field_validator("look")
+    @classmethod
+    def look_ok(cls, v):
+        if v is None:
+            return v
+        hue, bg = v.get("hue"), v.get("bg", "nessuno")
+        if hue is not None and (isinstance(hue, bool) or not isinstance(hue, int) or not 0 <= hue <= 360):
+            raise ValueError("Colore non valido")
+        if bg not in LOOK_BG:
+            raise ValueError("Sfondo non valido")
+        return {"hue": hue, "bg": bg}
 
     @field_validator("theme")
     @classmethod
@@ -89,6 +105,7 @@ def public_user(u: dict) -> dict:
         "name": u["name"],
         "photo": u.get("photo"),
         "theme": u.get("theme", "auto"),
+        "look": u.get("look") or {"hue": None, "bg": "nessuno"},
         "notifications": u.get("notifications", {"master": True, "types": dict(logic.NOTIFICATION_TYPES)}),
         "couple_id": u.get("couple_id"),
     }
@@ -278,6 +295,8 @@ async def update_me(body: ProfileIn, user: dict = Depends(current_user)):
         update["photo"] = body.photo or None
     if body.theme is not None:
         update["theme"] = body.theme
+    if body.look is not None:
+        update["look"] = body.look
     if body.notifications is not None:
         current = public_user(user)["notifications"]
         types = {**current["types"]}

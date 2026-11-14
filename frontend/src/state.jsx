@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { api, getToken, setToken, wsUrl, setCurrentUser, resetOffline } from './api'
 import { flush, onFlushed } from './offline'
-import { applyTheme } from './util'
+import { applyLook, applyTheme } from './util'
 
 const Ctx = createContext(null)
 export const useApp = () => useContext(Ctx)
@@ -16,6 +16,7 @@ export function AppProvider({ children }) {
     setUser(u)
     setCurrentUser(u.id)
     setHome(h)
+    applyLook(u.look)
     applyTheme(u.theme)
     return u
   }, [])
@@ -88,7 +89,7 @@ export function AppProvider({ children }) {
     register: (b) => enter('/auth/register', b),
     logout: () => { setToken(null); setUser(null); setHome(null); resetOffline() },
     reload: loadAll,
-    saveProfile: async (patch) => { const u = await api.patch('/me', patch); setUser(u); if (patch.theme) applyTheme(u.theme); await loadAll() },
+    saveProfile: async (patch) => { const u = await api.patch('/me', patch); setUser(u); if (patch.theme) applyTheme(u.theme); if (patch.look) applyLook(u.look); await loadAll() },
     saveCouple: async (patch) => { await api.patch('/couple', patch); await loadAll() },
   }
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

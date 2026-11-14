@@ -67,3 +67,6 @@ Nessuna pubblicità né analytics di terzi. Le registrazioni si chiudono dopo du
 ### Recupero password
 - **Con il partner**: Impostazioni → «Codice di recupero» genera un codice monouso di 8 caratteri (15 minuti, 5 tentativi). Chi ha dimenticato la password usa «Password dimenticata?» nel login.
 - **D'emergenza** (se non c'è un partner che possa aiutare): su Render aggiungi le variabili `RESET_EMAIL` e `RESET_PASSWORD` (min. 8 caratteri), attendi il riavvio, accedi, poi **rimuovile**.
+
+### Colori e sfondo
+Impostazioni → «Colori e sfondo»: un cursore cambia la tinta di tutta l'app (chiaro e scuro, con contrasto garantito) e vale solo per chi lo sceglie (campo `look` del profilo). Sfondi: semplice, sfumatura, aloni, puntini (seguono il colore) oppure una foto, salvata solo sul dispositivo con regolazione della schiaritura.

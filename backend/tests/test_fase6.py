@@ -141,3 +141,15 @@ async def test_eliminazione_multipla_con_ripristino(duo):
     assert (await c.post("/api/bulk/tasks/delete", headers=H(a), json={"ids": []})).status_code == 422
     ev = (await c.post("/api/events", headers=H(a), json={"title": "Inutile", "start": "2030-01-01T10:00"})).json()["id"]
     assert (await c.post("/api/bulk/events/delete", headers=H(b), json={"ids": [ev]})).json()["deleted"] == [ev]
+
+
+async def test_personalizzazione_colori_e_sfondo(duo):
+    c, a, b = duo
+    assert (await c.get("/api/me", headers=H(a))).json()["look"] == {"hue": None, "bg": "nessuno"}
+    r = await c.patch("/api/me", headers=H(a), json={"look": {"hue": 200, "bg": "aloni"}})
+    assert r.json()["look"] == {"hue": 200, "bg": "aloni"}
+    assert (await c.get("/api/me", headers=H(b))).json()["look"]["hue"] is None  # ognuno ha il suo
+    for bad in ({"hue": 400, "bg": "aloni"}, {"hue": -1}, {"hue": "x"}, {"hue": 10, "bg": "<script>"}, {"hue": True}):
+        assert (await c.patch("/api/me", headers=H(a), json={"look": bad})).status_code == 422
+    r = await c.patch("/api/me", headers=H(a), json={"look": {"hue": None, "bg": "nessuno"}})
+    assert r.json()["look"] == {"hue": None, "bg": "nessuno"}

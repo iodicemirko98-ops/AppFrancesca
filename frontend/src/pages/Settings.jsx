@@ -3,7 +3,7 @@ import { disablePush, enablePush, isIOS, isStandalone, pushState } from '../push
 import { useApp } from '../state'
 import { api } from '../api'
 import { Avatar, PageHeader, Row, Toggle } from '../components/ui'
-import { downloadBlob, resizeImage } from '../util'
+import { applyLook, downloadBlob, getLook, removeBackgroundPhoto, resizeImage, setBackgroundDim, setBackgroundPhoto } from '../util'
 
 const MODULES = {
   calendario: 'Calendario', attivita: 'Attività', liste: 'Liste', domanda: 'Domanda del giorno',
@@ -44,6 +44,16 @@ export default function Settings() {
   useEffect(() => { pushState().then(setPush).catch(() => setPush('unsupported')) }, [])
   const togglePush = run(async (v) => { if (v) await enablePush(); else await disablePush(); setPush(await pushState()) })
   const [rc, setRc] = useState(null)
+  const [look, setLook] = useState(() => ({ ...getLook() }))
+  const saveT = useRef()
+  const [dim, setDim] = useState(() => Number(localStorage.getItem('sfondo-dim') ?? 55))
+  const [hasFoto, setHasFoto] = useState(() => !!localStorage.getItem('sfondo-foto'))
+  const photoRef = useRef()
+  const changeLook = (patch, save = true) => {
+    const n = { ...look, ...patch }
+    setLook(n); applyLook(n)
+    if (save) { clearTimeout(saveT.current); saveT.current = setTimeout(() => saveProfile({ look: n }).catch(() => {}), 500) }
+  }
   const [pt, setPt] = useState(null)
   const me = couple.members.find((m) => m.id === user.id)
   const notif = user.notifications
@@ -95,6 +105,43 @@ export default function Settings() {
             <button key={k} onClick={run(() => saveProfile({ theme: k }))}
               className={`rounded-2xl py-2.5 text-sm font-semibold ${user.theme === k ? 'bg-accent text-accent-ink' : 'bg-soft'}`}>{l}</button>
           ))}
+        </div>
+      </Section>
+
+      <Section title="Colori e sfondo">
+        <div className="space-y-4 py-3">
+          <div>
+            <div className="mb-2 flex items-center justify-between"><span className="label !mb-0">Colore dell'app</span>
+              {look.hue !== null && <button className="text-sm font-semibold text-accent" onClick={() => changeLook({ hue: null })}>Ripristina</button>}</div>
+            <input type="range" min="0" max="360" aria-label="Colore dell'app" className="hue-slider" value={look.hue ?? 16}
+              onChange={(e) => changeLook({ hue: Number(e.target.value) })} />
+          </div>
+          <div>
+            <span className="label">Sfondo</span>
+            <div className="flex flex-wrap gap-2">
+              {[['nessuno', 'Semplice'], ['sfumatura', 'Sfumatura'], ['aloni', 'Aloni'], ['puntini', 'Puntini'], ['foto', 'Foto']].map(([k, l]) => (
+                <button key={k} aria-pressed={look.bg === k} onClick={() => (k === 'foto' && !hasFoto ? photoRef.current.click() : changeLook({ bg: k }))}
+                  className={`rounded-full px-4 py-1.5 text-sm font-medium ${look.bg === k ? 'bg-accent text-accent-ink' : 'bg-soft'}`}>{l}</button>
+              ))}
+            </div>
+            <input ref={photoRef} type="file" accept="image/*" hidden onChange={run(async (e) => {
+              const f = e.target.files[0]; if (!f) return
+              await setBackgroundPhoto(f); setHasFoto(true); changeLook({ bg: 'foto' }); e.target.value = ''
+            })} />
+            {look.bg === 'foto' && (
+              <div className="mt-3 space-y-2">
+                <label className="label" htmlFor="dim">Quanto schiarire la foto</label>
+                <input id="dim" type="range" min="10" max="90" className="w-full accent-[rgb(var(--accent))]" value={dim}
+                  onChange={(e) => { const v = Number(e.target.value); setDim(v); setBackgroundDim(v); applyLook() }} />
+                <div className="flex gap-4 text-sm font-semibold text-accent">
+                  <button onClick={() => photoRef.current.click()}>Cambia foto</button>
+                  <button onClick={() => { removeBackgroundPhoto(); setHasFoto(false); changeLook({ bg: 'nessuno' }) }}>Rimuovi</button>
+                </div>
+                <p className="text-xs text-mute">La foto resta solo su questo dispositivo.</p>
+              </div>
+            )}
+          </div>
+          <p className="text-xs text-mute">Il colore vale solo per te: ognuno dei due può sceglierne uno diverso.</p>
         </div>
       </Section>
 
