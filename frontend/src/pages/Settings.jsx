@@ -9,12 +9,12 @@ const MODULES = {
   calendario: 'Calendario', attivita: 'Attività', liste: 'Liste', domanda: 'Domanda del giorno',
   decidere: 'Decidere insieme', fare_insieme: 'Da fare insieme', desideri: 'Desideri e radar regali',
   buono_a_sapersi: 'Buono a sapersi', note: 'Note, capsule e storie', viaggi: 'Viaggi', risparmi: 'Risparmi', spese: 'Spese comuni',
-  cassaforte: 'Cassaforte', disegno: 'Disegno condiviso', ciclo: 'Ciclo (privato)', anno: 'Il nostro anno',
+  cassaforte: 'Cassaforte', disegno: 'Disegno condiviso', ciclo: 'Ciclo (privato)', anno: 'Il nostro anno', ricette: 'Ricettario',
 }
 const NOTIFS = {
   eventi: 'Promemoria eventi', attivita: 'Attività assegnate e completate', solleciti: 'Solleciti',
   domanda: 'Domanda del giorno', risposta_partner: 'Risposta del partner', sondaggi: 'Nuovi sondaggi',
-  capsule: 'Capsula sbloccata', regali: 'Radar regali', trivia: 'Sfide Trivia',
+  capsule: 'Capsula sbloccata', regali: 'Radar regali', trivia: 'Sfide Trivia', ricette: 'Nuove ricette',
 }
 
 function Section({ title, children }) {

@@ -18,6 +18,7 @@ export default defineConfig({
         description: 'Il nostro spazio privato',
         lang: 'it',
         start_url: '/',
+        share_target: { action: '/ricette', method: 'GET', params: { title: 'title', text: 'text', url: 'url' } },
         display: 'standalone',
         background_color: '#FBF6F0',
         theme_color: '#C2603F',

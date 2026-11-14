@@ -29,6 +29,7 @@ const Ciclo = lazy(() => import('./pages/Ciclo'))
 const Anno = lazy(() => import('./pages/Anno'))
 const TriviaHome = lazy(() => import('./pages/Trivia').then((m) => ({ default: m.TriviaHome })))
 const TriviaMatch = lazy(() => import('./pages/Trivia').then((m) => ({ default: m.TriviaMatch })))
+const Ricette = lazy(() => import('./pages/Ricette'))
 const Foto = lazy(() => import('./pages/Foto'))
 
 const Tab = ({ to, icon: Icon, label, active }) => (
@@ -81,6 +82,7 @@ export default function App() {
           {on('cassaforte') && <Route path="/cassaforte" element={<Cassaforte />} />}
           {on('disegno') && <Route path="/disegno" element={<Disegno />} />}
           {couple.modules?.ciclo === true && <Route path="/ciclo" element={<Ciclo />} />}
+          {on('ricette') && <Route path="/ricette" element={<Ricette />} />}
           {on('foto') && <Route path="/foto" element={<Foto />} />}
           {on('trivia') && <Route path="/trivia" element={<TriviaHome />} />}
           {on('trivia') && <Route path="/trivia/:id" element={<TriviaMatch />} />}

@@ -83,3 +83,6 @@ Categoria a tema (54 domande: libri, film, magia, trama, curiosità), fuori dal 
 
 ### Keep-alive
 Il workflow `.github/workflows/keepalive.yml` chiama `/health` ogni 5 minuti per evitare che Render free vada in sleep (serve anche allo scheduler delle notifiche). Alternativa: UptimeRobot.
+
+### Ricettario
+Sezione `/ricette`: ricette con link (Instagram o altro), categoria, ingredienti, procedimento, foto, preferita, provata e voto. Su Android (app installata) «Condividi» da Instagram → NoiDue apre il modulo già compilato con il link (Web Share Target; su iPhone si incolla il link).

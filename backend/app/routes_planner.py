@@ -17,7 +17,7 @@ TRASH_DAYS = 7
 NUDGE_COOLDOWN_S = 20
 TRASHABLE = {"events": "evento", "tasks": "attività", "lists": "lista", "polls": "decisione", "bucket": "idea da fare insieme",
              "wishes": "desiderio", "facts": "informazione", "notes": "nota", "trips": "luogo",
-             "goals": "obiettivo", "expenses": "spesa", "drawings": "disegno", "photos": "foto"}
+             "goals": "obiettivo", "expenses": "spesa", "drawings": "disegno", "photos": "foto", "recipes": "ricetta"}
 
 
 def now() -> str:
@@ -510,7 +510,7 @@ async def trash(c: dict = Depends(ctx)):
     return out
 
 
-BULK = {"events", "tasks", "lists", "photos"}
+BULK = {"events", "tasks", "lists", "photos", "recipes"}
 
 
 class BulkIn(BaseModel):
