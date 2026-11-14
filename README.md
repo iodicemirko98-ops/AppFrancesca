@@ -7,6 +7,12 @@ impostazioni (profilo, tema, notifiche, sezioni, esportazione dati, cancellazion
 (assegnate a uno, all'altro o a entrambi, categorie, scadenze, solleciti con messaggi sempre più insistenti),
 liste condivise (spesa, film, viaggi…), cestino "Eliminati di recente" (7 giorni), notifiche in-app e
 sincronizzazione in tempo reale tra i due telefoni (WebSocket).
+
+**Fase 3** — domanda del giorno (risposte segrete finché non rispondete entrambi, con storico), decidere insieme
+(sondaggi a voto segreto, sorteggio in caso di pareggio, sorteggio rapido) e da fare insieme (lista di cose da vivere,
+con ricordo dopo averle fatte e "cosa facciamo?" casuale).
+
+**Grafica** — serif Cormorant + Outfit (inclusi nell'app, nessuna richiesta a servizi esterni), icone a linea, barra a pillola.
 Le fasi successive si aggiungono sopra questa base.
 
 ## Provare in locale

@@ -9,6 +9,7 @@ from . import logic
 from .config import settings
 from .db import get_db
 from .routes_planner import home_data
+from .routes_together import question_summary
 from .security import create_token, current_user, hash_password, verify_password
 
 router = APIRouter(prefix="/api")
@@ -293,6 +294,8 @@ async def home(user: dict = Depends(current_user)):
            "unread_notifications": await get_db().notifications.count_documents(
                {"couple_id": couple["_id"], "to": user["_id"], "read": False})}
     out.update(await home_data({"cid": couple["_id"]}))
+    out["daily_question"] = await question_summary({"cid": couple["_id"], "user": user, "couple": couple,
+        "partner_id": next((m for m in couple["members"] if m != user["_id"]), None)})
     if couple.get("start_date"):
         start = date.fromisoformat(couple["start_date"])
         out["days_together"] = logic.days_together(start, today)

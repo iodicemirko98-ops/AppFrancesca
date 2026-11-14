@@ -8,6 +8,7 @@ from .db import init_indexes
 from .realtime import router as ws_router
 from .routes import router
 from .routes_planner import router as planner_router
+from .routes_together import router as together_router
 
 
 @asynccontextmanager
@@ -25,6 +26,7 @@ app.add_middleware(
 )
 app.include_router(router)
 app.include_router(planner_router)
+app.include_router(together_router)
 app.include_router(ws_router)
 
 

@@ -38,7 +38,7 @@ NOTIFICATION_TYPES = {
 
 # Collezioni (aggiunte nelle fasi successive) i cui documenti hanno `couple_id`
 # e vanno spostati nello spazio condiviso quando il partner si collega.
-COUPLE_COLLECTIONS: list[str] = ["events", "tasks", "task_categories", "lists", "notifications"]
+COUPLE_COLLECTIONS: list[str] = ["events", "tasks", "task_categories", "lists", "notifications", "answers", "polls", "bucket"]
 
 DAY_MILESTONES = [100, 200, 300, 500, 1000, 1500, 2000, 2500, 3000]
 

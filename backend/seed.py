@@ -68,6 +68,32 @@ async def main():
     ])
     await db.notifications.insert_one({"_id": uuid.uuid4().hex, "couple_id": cid, "to": G, "from": M, "type": "eventi",
         "text": "Marco ha aggiunto «Cena da Luigi» al calendario", "link": "/calendario", "read": False, "created_at": now()})
+    from app.questions import question_for
+    for n, (a_m, a_g) in enumerate([("Il giorno in cui abbiamo cucinato la carbonara sbagliata e abbiamo riso per un'ora.", "La prima sera sul lungomare, quando mi hai prestato la giacca."),
+                                    ("Un weekend senza programmi, solo noi e il divano.", "Lisbona, senza dubbio: il tram 28 e i pastéis de nata.")], start=1):
+        day = t - timedelta(days=n)
+        await db.answers.insert_many([
+            {"_id": uuid.uuid4().hex, "couple_id": cid, "date": day.isoformat(), "user_id": M, "text": a_m, "created_at": now(), "updated_at": now()},
+            {"_id": uuid.uuid4().hex, "couple_id": cid, "date": day.isoformat(), "user_id": G, "text": a_g, "created_at": now(), "updated_at": now()}])
+    await db.answers.insert_one({"_id": uuid.uuid4().hex, "couple_id": cid, "date": t.isoformat(), "user_id": G,
+        "text": "Quando fai le vocine mentre cucini.", "created_at": now(), "updated_at": now()})
+    opt = lambda *xs: [{"id": uuid.uuid4().hex[:8], "text": x} for x in xs]
+    o1 = opt("Pizza da Gigi", "Sushi", "Osteria del Borgo")
+    o2 = opt("Dolomiti", "Costiera Amalfitana")
+    await db.polls.insert_many([
+        {"_id": uuid.uuid4().hex, **base, "title": "Dove mangiamo sabato?", "options": o1, "votes": {M: o1[0]["id"]}, "status": "open",
+         "winner_id": None, "tie_broken": False, "created_by": M},
+        {"_id": uuid.uuid4().hex, **base, "title": "Dove andiamo ad agosto?", "options": o2, "votes": {M: o2[1]["id"], G: o2[1]["id"]},
+         "status": "closed", "winner_id": o2[1]["id"], "tie_broken": False, "created_by": G},
+    ])
+    bk = lambda title, cat, **k: {"_id": uuid.uuid4().hex, **base, "title": title, "category": cat, "notes": None, "done": k.get("done", False),
+        "done_on": k.get("on"), "done_by": M if k.get("done") else None, "memory": k.get("memory"), "created_by": G}
+    await db.bucket.insert_many([
+        bk("Vedere l'alba al mare", "natura"), bk("Corso di cucina di coppia", "cibo"), bk("Notte in un rifugio in montagna", "viaggi"),
+        bk("Ballare sotto la pioggia", "esperienze"), bk("Cena al buio", "cibo"),
+        bk("Picnic al tramonto", "natura", done=True, on=d(-20), memory="Con le zanzare, ma bellissimo."),
+        bk("Fare il giro dei mercatini di Natale", "esperienze", done=True, on=d(-60), memory="Vin brulé e mani gelate."),
+    ])
     print("Fatto: Marco e Giulia, insieme da 413 giorni.")
 
 asyncio.run(main())

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Bell, Sparkles, ChevronRight } from 'lucide-react'
+import { Bell, Sparkles, ChevronRight, MessageCircleQuestion } from 'lucide-react'
 import { useApp } from '../state'
 import { Avatar } from '../components/ui'
 import MilestoneCard from '../components/MilestoneCard'
@@ -81,6 +81,15 @@ export default function Home() {
       </div>
 
       {m?.today && <MilestoneCard label={m.today} names={names} days={home.days_together} date={fmtDate(home.today)} />}
+
+      {couple.modules?.domanda !== false && home.daily_question && (
+        <Link to="/domanda" className="card block">
+          <div className="eyebrow">Domanda del giorno</div>
+          <p className="display mt-2 text-2xl leading-snug">{home.daily_question.question}</p>
+          <p className="mt-3 flex items-center gap-2 text-sm text-mute"><MessageCircleQuestion size={16} strokeWidth={1.6} />
+            {home.daily_question.answered ? (home.daily_question.partner_answered ? 'Avete risposto entrambi: leggete le risposte' : 'Hai risposto. Aspettiamo il partner') : home.daily_question.partner_answered ? 'Il partner ha già risposto: tocca a te' : 'Rispondi: le risposte restano segrete finché non rispondete entrambi'}</p>
+        </Link>
+      )}
 
       {couple.modules?.calendario !== false && home.next_events.length > 0 && (
         <section className="space-y-2">

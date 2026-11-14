@@ -14,7 +14,7 @@ router = APIRouter(prefix="/api")
 
 TRASH_DAYS = 7
 NUDGE_COOLDOWN_S = 20
-TRASHABLE = {"events": "evento", "tasks": "attività", "lists": "lista"}
+TRASHABLE = {"events": "evento", "tasks": "attività", "lists": "lista", "polls": "decisione", "bucket": "idea da fare insieme"}
 
 
 def now() -> str:
