@@ -1,5 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useState } from 'react'
-import { api, getToken, setToken } from './api'
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { api, getToken, setToken, wsUrl } from './api'
 import { applyTheme } from './util'
 
 const Ctx = createContext(null)
@@ -32,6 +32,45 @@ export function AppProvider({ children }) {
     return () => document.removeEventListener('visibilitychange', onVis)
   }, [loadAll])
 
+  // ---- sincronizzazione in tempo reale (WebSocket con riconnessione) ----
+  const subs = useRef(new Set())
+  const subscribe = useCallback((fn) => { subs.current.add(fn); return () => subs.current.delete(fn) }, [])
+  const userId = user?.id
+  useEffect(() => {
+    if (!userId) return
+    let ws, timer, ping, tries = 0, stopped = false
+    const fire = (m) => subs.current.forEach((f) => f(m))
+    const open = () => {
+      ws = new WebSocket(wsUrl(getToken()))
+      ws.onopen = () => {
+        if (tries > 0) { fire({ entity: '*' }); loadAll().catch(() => {}) } // dopo una pausa: rileggi tutto
+        tries = 0
+        ping = setInterval(() => ws.readyState === 1 && ws.send('ping'), 25000)
+      }
+      ws.onmessage = (e) => {
+        if (e.data === 'pong') return
+        const m = JSON.parse(e.data)
+        if (m.entity === 'hello') return
+        fire(m)
+        if (m.entity === 'notifications' || m.entity === 'tasks' || m.entity === 'events') loadAll().catch(() => {})
+      }
+      ws.onclose = () => {
+        clearInterval(ping)
+        if (!stopped) timer = setTimeout(open, Math.min(15000, 1000 * 2 ** tries++))
+      }
+    }
+    open()
+    return () => { stopped = true; clearTimeout(timer); clearInterval(ping); ws?.close() }
+  }, [userId, loadAll])
+
+  // ---- avviso temporaneo con "Annulla" ----
+  const [toast, setToast] = useState(null)
+  const showToast = useCallback((text, action) => {
+    const id = Math.random()
+    setToast({ id, text, action })
+    setTimeout(() => setToast((t) => (t?.id === id ? null : t)), 6000)
+  }, [])
+
   const enter = async (path, body) => {
     const r = await api.post(path, body)
     setToken(r.token)
@@ -39,7 +78,7 @@ export function AppProvider({ children }) {
   }
 
   const value = {
-    user, home, loading,
+    user, home, loading, subscribe, toast, showToast, closeToast: () => setToast(null),
     couple: home?.couple,
     login: (email, password) => enter('/auth/login', { email, password }),
     register: (b) => enter('/auth/register', b),

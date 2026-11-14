@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useApp } from '../state'
 import { Avatar } from '../components/ui'
 import MilestoneCard from '../components/MilestoneCard'
 import { fmtDate } from '../util'
+import { EventRow } from './Calendar'
 
 function Invite({ code }) {
   const [copied, setCopied] = useState(false)
@@ -76,6 +78,31 @@ export default function Home() {
             <div className="font-semibold">Prossima data tonda: {m.next.label}</div>
             <div className="text-sm text-mute">{m.next.in_days === 1 ? 'domani' : `tra ${m.next.in_days} giorni`} · {fmtDate(m.next.date)}</div>
           </div>
+        </div>
+      )}
+
+      {home.unread_notifications > 0 && (
+        <Link to="/notifiche" className="card flex items-center gap-3 !p-4 ring-accent/40">
+          <span className="text-2xl">🔔</span>
+          <span className="flex-1 font-semibold">{home.unread_notifications === 1 ? '1 nuova notifica' : `${home.unread_notifications} nuove notifiche`}</span><span className="text-mute">›</span>
+        </Link>
+      )}
+
+      {couple.modules?.calendario !== false && home.next_events.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between"><h2 className="font-bold">Prossimi appuntamenti</h2><Link to="/calendario" className="text-sm font-semibold text-accent">Calendario</Link></div>
+          {home.next_events.map((e) => <Link key={e.key} to="/calendario" className="block"><EventRow e={e} showDate /></Link>)}
+        </div>
+      )}
+
+      {couple.modules?.attivita !== false && home.due_tasks.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between"><h2 className="font-bold">Da fare a breve</h2><Link to="/attivita" className="text-sm font-semibold text-accent">Attività</Link></div>
+          {home.due_tasks.map((t) => (
+            <Link key={t.id} to="/attivita" className="flex items-center gap-3 rounded-2xl bg-soft px-4 py-3">
+              <span className="flex-1 truncate font-semibold">{t.title}</span>
+              <span className={`text-sm ${t.overdue ? 'font-semibold text-red-600 dark:text-red-400' : 'text-mute'}`}>{t.overdue ? 'in ritardo' : fmtDate(t.due).replace(/ \d{4}$/, '')}</span>
+            </Link>))}
         </div>
       )}
 

@@ -1,8 +1,13 @@
-# NoiDue — fase 1
+# NoiDue — fasi 1 e 2
 
-Autenticazione, abbinamento con codice invito, home con contatore dei giorni e date tonde, impostazioni
-(profilo, tema, notifiche, sezioni, esportazione dati, cancellazione account). PWA installabile.
-Le fasi successive (calendario, attività, liste, …) si aggiungono sopra questa base.
+**Fase 1** — autenticazione, abbinamento con codice invito, home con contatore dei giorni e date tonde,
+impostazioni (profilo, tema, notifiche, sezioni, esportazione dati, cancellazione account). PWA installabile.
+
+**Fase 2** — calendario (vista mese + agenda, eventi con ripetizioni, categorie, promemoria), attività
+(assegnate a uno, all'altro o a entrambi, categorie, scadenze, solleciti con messaggi sempre più insistenti),
+liste condivise (spesa, film, viaggi…), cestino "Eliminati di recente" (7 giorni), notifiche in-app e
+sincronizzazione in tempo reale tra i due telefoni (WebSocket).
+Le fasi successive si aggiungono sopra questa base.
 
 ## Provare in locale
 Serve MongoDB (locale o gratuito su Atlas).

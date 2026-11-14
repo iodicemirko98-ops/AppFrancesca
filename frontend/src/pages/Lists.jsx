@@ -1,0 +1,82 @@
+import { useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { api } from '../api'
+import { useApp } from '../state'
+import { useLive } from '../hooks'
+import Sheet from '../components/Sheet'
+
+const KINDS = { spesa: ['🛒', 'Spesa'], viaggio: ['🧳', 'Viaggio'], film: ['🎬', 'Film da vedere'], ristoranti: ['🍝', 'Ristoranti'], regali: ['🎁', 'Regali'], generica: ['📝', 'Lista'] }
+
+export function ListsPage() {
+  const { data, reload } = useLive('/lists', ['lists'])
+  const nav = useNavigate()
+  const [open, setOpen] = useState(false)
+  const [name, setName] = useState('')
+  const [kind, setKind] = useState('spesa')
+  const create = async (e) => {
+    e.preventDefault()
+    const l = await api.post('/lists', { name: name.trim(), kind })
+    setOpen(false); setName(''); reload(); nav(`/liste/${l.id}`)
+  }
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between"><h1 className="text-xl font-bold">Liste</h1><button className="btn !py-2" onClick={() => setOpen(true)}>+ Nuova</button></div>
+      {data === null ? <p className="text-mute">Un attimo…</p> : data.length === 0 ? <div className="card text-center text-mute">Nessuna lista ancora.<br />Create la prima: spesa, film da vedere, idee di viaggio…</div> : (
+        <div className="space-y-2">{data.map((l) => (
+          <Link key={l.id} to={`/liste/${l.id}`} className="card flex items-center gap-4 !p-4">
+            <span className="text-3xl">{KINDS[l.kind]?.[0]}</span>
+            <span className="min-w-0 flex-1"><span className="block truncate font-semibold">{l.name}</span><span className="text-sm text-mute">{l.total === 0 ? 'Vuota' : `${l.done_count} di ${l.total} fatte`}</span></span>
+            <span className="text-mute">›</span>
+          </Link>))}</div>
+      )}
+      {open && (
+        <Sheet title="Nuova lista" onClose={() => setOpen(false)}>
+          <form onSubmit={create} className="space-y-3">
+            <div><label className="label" htmlFor="l-nome">Nome</label><input id="l-nome" className="input" value={name} onChange={(e) => setName(e.target.value)} autoFocus required maxLength={60} placeholder="Es. Spesa della settimana" /></div>
+            <div><label className="label" htmlFor="l-tipo">Tipo</label><select id="l-tipo" className="input" value={kind} onChange={(e) => setKind(e.target.value)}>{Object.entries(KINDS).map(([k, [i, l]]) => <option key={k} value={k}>{i} {l}</option>)}</select></div>
+            <button className="btn w-full" disabled={!name.trim()}>Crea lista</button>
+          </form>
+        </Sheet>
+      )}
+    </div>
+  )
+}
+
+export function ListDetail() {
+  const { id } = useParams()
+  const nav = useNavigate()
+  const { showToast } = useApp()
+  const { data: l, error, setData } = useLive(`/lists/${id}`, ['lists'])
+  const [text, setText] = useState('')
+  const [renaming, setRenaming] = useState(false)
+  const [name, setName] = useState('')
+  if (error && !l) return <div className="card text-center"><p className="mb-3 text-mute">Questa lista non c'è più.</p><Link to="/liste" className="btn">Torna alle liste</Link></div>
+  if (!l) return <p className="text-mute">Un attimo…</p>
+  const add = async (e) => { e.preventDefault(); const t = text.trim(); if (!t) return; setText(''); setData(await api.post(`/lists/${id}/items`, { text: t })) }
+  const toggle = async (i) => setData(await api.patch(`/lists/${id}/items/${i.id}`, { done: !i.done }))
+  const del = async (i) => setData(await api.del(`/lists/${id}/items/${i.id}`))
+  const clear = async () => setData(await api.post(`/lists/${id}/clear-done`))
+  const remove = async () => { await api.del(`/lists/${id}`); nav('/liste'); showToast('Lista eliminata', { label: 'Annulla', run: () => api.post(`/trash/lists/${id}/restore`) }) }
+  const rename = async (e) => { e.preventDefault(); setData(await api.patch(`/lists/${id}`, { name: name.trim() })); setRenaming(false) }
+  const open = l.items.filter((i) => !i.done), done = l.items.filter((i) => i.done)
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Link to="/liste" aria-label="Indietro" className="btn-soft !px-4 !py-2">‹</Link>
+        <h1 className="min-w-0 flex-1 truncate text-xl font-bold">{KINDS[l.kind]?.[0]} {l.name}</h1>
+        <button aria-label="Rinomina lista" className="btn-soft !px-3 !py-2" onClick={() => { setName(l.name); setRenaming(true) }}>✎</button>
+        <button aria-label="Elimina lista" className="btn-soft !px-3 !py-2" onClick={remove}>🗑</button>
+      </div>
+      <form onSubmit={add} className="flex gap-2"><input aria-label="Nuova voce" className="input" placeholder="Aggiungi una voce…" value={text} onChange={(e) => setText(e.target.value)} maxLength={160} /><button className="btn" disabled={!text.trim()}>+</button></form>
+      {l.items.length === 0 && <p className="text-center text-mute">Lista vuota. Aggiungete la prima voce!</p>}
+      <div className="space-y-2">{[...open, ...done].map((i) => (
+        <div key={i.id} className="flex items-center gap-3 rounded-2xl bg-soft px-4 py-3">
+          <button role="checkbox" aria-checked={i.done} aria-label={`Segna ${i.text}`} onClick={() => toggle(i)} className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ring-2 ${i.done ? 'bg-accent text-accent-ink ring-accent' : 'ring-line'}`}>{i.done ? '✓' : ''}</button>
+          <span className={`min-w-0 flex-1 break-words ${i.done ? 'text-mute line-through' : ''}`}>{i.text}</span>
+          <button aria-label={`Rimuovi ${i.text}`} onClick={() => del(i)} className="px-1 text-mute">✕</button>
+        </div>))}</div>
+      {done.length > 0 && <button className="btn-soft w-full" onClick={clear}>Rimuovi le {done.length} completate</button>}
+      {renaming && <Sheet title="Rinomina lista" onClose={() => setRenaming(false)}><form onSubmit={rename} className="space-y-3"><input aria-label="Nome lista" className="input" value={name} onChange={(e) => setName(e.target.value)} autoFocus required maxLength={60} /><button className="btn w-full" disabled={!name.trim()}>Salva</button></form></Sheet>}
+    </div>
+  )
+}

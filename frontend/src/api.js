@@ -46,3 +46,8 @@ export const api = {
   patch: (p, b) => request('PATCH', p, b),
   del: (p, b) => request('DELETE', p, b),
 }
+
+export function wsUrl(token) {
+  const base = BASE || location.origin
+  return base.replace(/^http/, 'ws') + '/ws?token=' + encodeURIComponent(token)
+}

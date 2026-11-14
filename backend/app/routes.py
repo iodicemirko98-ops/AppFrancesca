@@ -8,6 +8,7 @@ from pymongo.errors import DuplicateKeyError
 from . import logic
 from .config import settings
 from .db import get_db
+from .routes_planner import home_data
 from .security import create_token, current_user, hash_password, verify_password
 
 router = APIRouter(prefix="/api")
@@ -288,7 +289,10 @@ async def home(user: dict = Depends(current_user)):
     today = logic.today_rome()
     out = {"couple": pc, "days_together": None, "milestone": None, "today": today.isoformat(),
            # riempiti dai moduli delle fasi successive
-           "daily_question": None, "next_events": [], "due_tasks": [], "last_note": None}
+           "daily_question": None, "next_events": [], "due_tasks": [], "last_note": None,
+           "unread_notifications": await get_db().notifications.count_documents(
+               {"couple_id": couple["_id"], "to": user["_id"], "read": False})}
+    out.update(await home_data({"cid": couple["_id"]}))
     if couple.get("start_date"):
         start = date.fromisoformat(couple["start_date"])
         out["days_together"] = logic.days_together(start, today)

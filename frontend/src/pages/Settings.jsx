@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useRef, useState } from 'react'
 import { useApp } from '../state'
 import { api } from '../api'
@@ -102,6 +103,10 @@ export default function Settings() {
               onChange={run((v) => saveProfile({ notifications: { types: { [k]: v } } }))} />
           </Row>
         ))}
+      </Section>
+
+      <Section title="Cestino">
+        <Row title="Eliminati di recente" hint="Recupera eventi, attività e liste entro 7 giorni"><Link to="/cestino" className="btn-soft !py-2">Apri</Link></Row>
       </Section>
 
       <Section title="Sezioni dell'app">
