@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { LayoutGrid, Home as HomeIcon } from 'lucide-react'
 import { SECTIONS } from './modules'
@@ -6,27 +7,29 @@ import { useApp } from './state'
 import { Spinner } from './components/ui'
 import Auth from './pages/Auth'
 import Home from './pages/Home'
-import Settings from './pages/Settings'
-import Calendar from './pages/Calendar'
-import Tasks from './pages/Tasks'
-import { ListsPage, ListDetail } from './pages/Lists'
-import Notifications from './pages/Notifications'
-import Trash from './pages/Trash'
-import Domanda from './pages/Domanda'
-import Decidere from './pages/Decidere'
-import FareInsieme from './pages/FareInsieme'
-import Desideri from './pages/Desideri'
-import BuonoASapersi from './pages/BuonoASapersi'
-import Note from './pages/Note'
-import Viaggi from './pages/Viaggi'
-import Risparmi from './pages/Risparmi'
-import Spese from './pages/Spese'
-import Cassaforte from './pages/Cassaforte'
-import Disegno from './pages/Disegno'
-import Ciclo from './pages/Ciclo'
-import Anno from './pages/Anno'
-import { TriviaHome, TriviaMatch } from './pages/Trivia'
-import Foto from './pages/Foto'
+const Settings = lazy(() => import('./pages/Settings'))
+const Calendar = lazy(() => import('./pages/Calendar'))
+const Tasks = lazy(() => import('./pages/Tasks'))
+const ListsPage = lazy(() => import('./pages/Lists').then((m) => ({ default: m.ListsPage })))
+const ListDetail = lazy(() => import('./pages/Lists').then((m) => ({ default: m.ListDetail })))
+const Notifications = lazy(() => import('./pages/Notifications'))
+const Trash = lazy(() => import('./pages/Trash'))
+const Domanda = lazy(() => import('./pages/Domanda'))
+const Decidere = lazy(() => import('./pages/Decidere'))
+const FareInsieme = lazy(() => import('./pages/FareInsieme'))
+const Desideri = lazy(() => import('./pages/Desideri'))
+const BuonoASapersi = lazy(() => import('./pages/BuonoASapersi'))
+const Note = lazy(() => import('./pages/Note'))
+const Viaggi = lazy(() => import('./pages/Viaggi'))
+const Risparmi = lazy(() => import('./pages/Risparmi'))
+const Spese = lazy(() => import('./pages/Spese'))
+const Cassaforte = lazy(() => import('./pages/Cassaforte'))
+const Disegno = lazy(() => import('./pages/Disegno'))
+const Ciclo = lazy(() => import('./pages/Ciclo'))
+const Anno = lazy(() => import('./pages/Anno'))
+const TriviaHome = lazy(() => import('./pages/Trivia').then((m) => ({ default: m.TriviaHome })))
+const TriviaMatch = lazy(() => import('./pages/Trivia').then((m) => ({ default: m.TriviaMatch })))
+const Foto = lazy(() => import('./pages/Foto'))
 
 const Tab = ({ to, icon: Icon, label, active }) => (
   <NavLink to={to} end={to === '/'} className={({ isActive }) => `flex flex-1 flex-col items-center gap-0.5 rounded-2xl py-2 text-[11px] font-medium transition ${(active ?? isActive) ? 'bg-accent/15 text-accent' : 'text-mute'}`}>
@@ -59,6 +62,7 @@ export default function App() {
     <div className="mx-auto min-h-screen max-w-md">
       <OfflineBanner />
       <main className="px-4 pb-32 pt-[max(1.25rem,env(safe-area-inset-top))]">
+        <Suspense fallback={<div className="skeleton" aria-busy="true"><i /><i /><i /></div>}>
         <Routes>
           <Route path="/" element={<Home />} />
           {on('calendario') && <Route path="/calendario" element={<Calendar />} />}
@@ -87,10 +91,11 @@ export default function App() {
           <Route path="/impostazioni" element={<Settings />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </Suspense>
       </main>
       <Toast />
       <nav className="fixed inset-x-0 bottom-0 z-10 px-3" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
-        <div className="mx-auto flex max-w-md gap-1 rounded-3xl bg-card/95 p-1.5 shadow-lg ring-1 ring-line backdrop-blur">
+        <div className="mx-auto flex max-w-md gap-1 rounded-3xl bg-card/95 p-1.5 shadow-lg ring-1 ring-line ">
           <Tab to="/" icon={HomeIcon} label="Home" />
           {navItems.map((x) => <Tab key={x.path} to={x.path} icon={x.icon} label={x.label.split(' ')[0]} />)}
           <Tab to="/altro" icon={LayoutGrid} label="Altro" active={!inNav} />
