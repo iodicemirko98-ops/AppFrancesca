@@ -63,6 +63,22 @@ export function applyTheme(theme) {
   applyLook()
 }
 
+// Ridimensiona una foto mantenendo le proporzioni (lato lungo `max`) e la restituisce come data URL JPEG.
+export function resizePhoto(file, max = 1000, quality = 0.72) {
+  return new Promise((resolve, reject) => {
+    const img = new Image(), url = URL.createObjectURL(file)
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height))
+      const c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k)
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height)
+      URL.revokeObjectURL(url)
+      resolve(c.toDataURL('image/jpeg', quality))
+    }
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Immagine non leggibile')) }
+    img.src = url
+  })
+}
+
 // Foto di sfondo: ridimensionata e salvata solo su questo dispositivo.
 export function setBackgroundPhoto(file, max = 1100) {
   return new Promise((resolve, reject) => {

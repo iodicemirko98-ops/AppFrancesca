@@ -82,3 +82,29 @@ async def test_nuove_domande_evitano_le_recenti(duo):
         qs = {q["q"] for q in m["questions"]}
         assert not (qs & seen)
         seen |= qs
+
+
+JPG = "data:image/jpeg;base64,/9j/4AAQSkZJRg=="
+
+
+async def test_album_foto_e_carosello(duo):
+    c, a, b = duo
+    p1 = (await c.post("/api/photos", headers=H(a), json={"data": JPG, "thumb": JPG, "caption": " Roma ", "fav": True})).json()
+    p2 = (await c.post("/api/photos", headers=H(b), json={"data": JPG, "thumb": JPG, "fav": False})).json()
+    assert p1["caption"] == "Roma" and "data" not in p1
+    for bad in ({"data": "http://x/y.jpg", "thumb": JPG}, {"data": JPG, "thumb": "data:image/png;base64,AAA"}, {"data": JPG + "A" * 700_001, "thumb": JPG}):
+        assert (await c.post("/api/photos", headers=H(a), json=bad)).status_code == 422
+    lst = (await c.get("/api/photos", headers=H(b))).json()
+    assert len(lst) == 2 and all("data" not in x and x["thumb"] for x in lst)  # la lista non porta le immagini piene
+    car = (await c.get("/api/photos/carousel", headers=H(b))).json()
+    assert [x["id"] for x in car] == [p1["id"]] and car[0]["data"] == JPG
+    assert (await c.get(f"/api/photos/{p2['id']}", headers=H(a))).json()["data"] == JPG
+    await c.patch(f"/api/photos/{p2['id']}", headers=H(a), json={"fav": True, "caption": "Mare"})
+    assert len((await c.get("/api/photos/carousel", headers=H(a))).json()) == 2
+    # eliminazione in blocco con ripristino dal cestino
+    r = await c.post("/api/bulk/photos/delete", headers=H(a), json={"ids": [p1["id"], p2["id"]]})
+    assert len(r.json()["deleted"]) == 2 and (await c.get("/api/photos", headers=H(a))).json() == []
+    tr = [t for t in (await c.get("/api/trash", headers=H(a))).json() if t["collection"] == "photos"]
+    assert {t["title"] for t in tr} == {"Roma", "Mare"}
+    await c.post(f"/api/trash/photos/{p1['id']}/restore", headers=H(a))
+    assert len((await c.get("/api/photos", headers=H(a))).json()) == 1

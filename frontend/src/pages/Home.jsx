@@ -6,6 +6,7 @@ import { Avatar } from '../components/ui'
 import MilestoneCard from '../components/MilestoneCard'
 import { fmtDate } from '../util'
 import { EventRow } from './Calendar'
+import PhotoCarousel from '../components/PhotoCarousel'
 
 function Invite({ code }) {
   const [copied, setCopied] = useState(false)
@@ -79,6 +80,8 @@ export default function Home() {
           <p className="mt-2 text-mute">Aggiungi la data di inizio per far partire il contatore</p>
         )}
       </div>
+
+      {couple.modules?.foto !== false && <PhotoCarousel />}
 
       {m?.today && <MilestoneCard label={m.today} names={names} days={home.days_together} date={fmtDate(home.today)} />}
 

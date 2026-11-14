@@ -73,3 +73,6 @@ Impostazioni → «Colori e sfondo»: un cursore cambia la tinta di tutta l'app 
 
 ## Fase 7 — Trivia
 Sezione **Trivia** (Altro → Trivia): sfide a due su 10 domande uguali per entrambi, 15 secondi a domanda, 100 punti per risposta esatta più fino a 50 di bonus velocità. 147 domande in 8 categorie (geografia, cultura pop, scienze, storia, sport, cibo, arte e letteratura, natura) più «mix»; le domande già viste di recente non si ripetono. Ognuno gioca quando vuole: il punteggio dell'altro si vede solo quando avete finito entrambi, con classifica vittorie. Le domande stanno in `backend/app/trivia_bank.py`.
+
+### Le nostre foto
+Altro → «Le nostre foto»: album condiviso (fino a 80 foto, compresse sul telefono prima dell'invio). Le foto con la ★ compaiono nel **carosello della home** (massimo 12, scorre da solo ogni 5 secondi e col dito). Didascalie, selezione multipla con annulla, cestino di 7 giorni. API: `/api/photos`.

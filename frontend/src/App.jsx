@@ -26,6 +26,7 @@ import Disegno from './pages/Disegno'
 import Ciclo from './pages/Ciclo'
 import Anno from './pages/Anno'
 import { TriviaHome, TriviaMatch } from './pages/Trivia'
+import Foto from './pages/Foto'
 
 const Tab = ({ to, icon: Icon, label, active }) => (
   <NavLink to={to} end={to === '/'} className={({ isActive }) => `flex flex-1 flex-col items-center gap-0.5 rounded-2xl py-2 text-[11px] font-medium transition ${(active ?? isActive) ? 'bg-accent/15 text-accent' : 'text-mute'}`}>
@@ -76,6 +77,7 @@ export default function App() {
           {on('cassaforte') && <Route path="/cassaforte" element={<Cassaforte />} />}
           {on('disegno') && <Route path="/disegno" element={<Disegno />} />}
           {couple.modules?.ciclo === true && <Route path="/ciclo" element={<Ciclo />} />}
+          {on('foto') && <Route path="/foto" element={<Foto />} />}
           {on('trivia') && <Route path="/trivia" element={<TriviaHome />} />}
           {on('trivia') && <Route path="/trivia/:id" element={<TriviaMatch />} />}
           {on('anno') && <Route path="/anno" element={<Anno />} />}

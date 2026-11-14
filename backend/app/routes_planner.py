@@ -16,7 +16,7 @@ TRASH_DAYS = 7
 NUDGE_COOLDOWN_S = 20
 TRASHABLE = {"events": "evento", "tasks": "attività", "lists": "lista", "polls": "decisione", "bucket": "idea da fare insieme",
              "wishes": "desiderio", "facts": "informazione", "notes": "nota", "trips": "luogo",
-             "goals": "obiettivo", "expenses": "spesa", "drawings": "disegno"}
+             "goals": "obiettivo", "expenses": "spesa", "drawings": "disegno", "photos": "foto"}
 
 
 def now() -> str:
@@ -479,6 +479,8 @@ async def clear_done(id: str, c: dict = Depends(ctx)):
 
 # ================= CESTINO =================
 def title_of(coll: str, d: dict) -> str:
+    if coll == "photos":
+        return d.get("caption") or "Foto"
     return d.get("title") or d.get("name") or d.get("label") or "Senza titolo"
 
 
@@ -501,7 +503,7 @@ async def trash(c: dict = Depends(ctx)):
     return out
 
 
-BULK = {"events", "tasks", "lists"}
+BULK = {"events", "tasks", "lists", "photos"}
 
 
 class BulkIn(BaseModel):
