@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Plus, ChevronLeft, ChevronRight, Pencil, Trash2, Check, X, ShoppingBasket, Plane, Clapperboard, UtensilsCrossed, Gift, StickyNote } from 'lucide-react'
+import { Plus, ChevronLeft, ChevronRight, Pencil, Trash2, Check, X, ShoppingBasket, Plane, Clapperboard, UtensilsCrossed, Gift, StickyNote, ListChecks } from 'lucide-react'
 import { api } from '../api'
 import { PageHeader } from '../components/ui'
 import { useApp } from '../state'
 import { useLive } from '../hooks'
+import { SelectBar, SelectMark, useSelect } from '../select'
 import Sheet from '../components/Sheet'
 
 const KINDS = { spesa: [ShoppingBasket, 'Spesa'], viaggio: [Plane, 'Viaggio'], film: [Clapperboard, 'Film da vedere'], ristoranti: [UtensilsCrossed, 'Ristoranti'], regali: [Gift, 'Regali'], generica: [StickyNote, 'Lista'] }
@@ -16,6 +17,7 @@ export function ListsPage() {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [kind, setKind] = useState('spesa')
+  const sel = useSelect('lists', (data || []).map((l) => l.id), reload)
   const create = async (e) => {
     e.preventDefault()
     const l = await api.post('/lists', { name: name.trim(), kind })
@@ -23,15 +25,21 @@ export function ListsPage() {
   }
   return (
     <div className="space-y-4">
-      <PageHeader eyebrow="Insieme" title="Liste" action={<button aria-label="Nuova lista" className="icon-btn" onClick={() => setOpen(true)}><Plus size={22} /></button>} />
+      <PageHeader eyebrow="Insieme" title="Liste" action={<><button aria-label="Seleziona" className="icon-btn-soft" onClick={() => (sel.on ? sel.stop() : sel.start())}><ListChecks size={19} strokeWidth={1.6} /></button><button aria-label="Nuova lista" className="icon-btn" onClick={() => setOpen(true)}><Plus size={22} /></button></>} />
       {data === null ? <div className="skeleton" aria-busy="true"><i /><i /><i /></div> : data.length === 0 ? <div className="card text-center text-mute">Nessuna lista ancora.<br />Create la prima: spesa, film da vedere, idee di viaggio…</div> : (
-        <div className="space-y-2">{data.map((l) => (
+        <div className="space-y-2">{data.map((l) => (sel.on ? (
+          <button key={l.id} onClick={() => sel.toggle(l.id)} className="card flex w-full items-center gap-4 !p-4 text-left">
+            <SelectMark checked={sel.ids.has(l.id)} />
+            <span className="min-w-0 flex-1"><span className="display block truncate text-xl">{l.name}</span><span className="text-sm text-mute">{l.total === 0 ? 'Vuota' : `${l.done_count} di ${l.total} fatte`}</span></span>
+          </button>
+        ) : (
           <Link key={l.id} to={`/liste/${l.id}`} className="card flex items-center gap-4 !p-4">
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/15 text-accent"><KIcon kind={l.kind} /></span>
             <span className="min-w-0 flex-1"><span className="display block truncate text-xl">{l.name}</span><span className="text-sm text-mute">{l.total === 0 ? 'Vuota' : `${l.done_count} di ${l.total} fatte`}</span></span>
             <ChevronRight size={18} className="text-mute" />
-          </Link>))}</div>
+          </Link>)))}</div>
       )}
+      <SelectBar sel={sel} />
       {open && (
         <Sheet title="Nuova lista" onClose={() => setOpen(false)}>
           <form onSubmit={create} className="space-y-3">

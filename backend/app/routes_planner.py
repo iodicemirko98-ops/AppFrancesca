@@ -501,6 +501,44 @@ async def trash(c: dict = Depends(ctx)):
     return out
 
 
+BULK = {"events", "tasks", "lists"}
+
+
+class BulkIn(BaseModel):
+    ids: list[str] = Field(min_length=1, max_length=200)
+
+
+@router.post("/bulk/{coll}/delete")
+async def bulk_delete(coll: str, body: BulkIn, c: dict = Depends(ctx)):
+    """Elimina (nel cestino) più elementi insieme; quelli che non esistono più vengono ignorati."""
+    if coll not in BULK:
+        raise HTTPException(404, "Non disponibile")
+    done = []
+    for i in dict.fromkeys(body.ids):
+        try:
+            await soft_delete(coll, i, c)
+            done.append(i)
+        except HTTPException:
+            pass
+    return {"deleted": done}
+
+
+@router.post("/bulk/{coll}/restore")
+async def bulk_restore(coll: str, body: BulkIn, c: dict = Depends(ctx)):
+    if coll not in BULK:
+        raise HTTPException(404, "Non disponibile")
+    done = []
+    for i in dict.fromkeys(body.ids):
+        try:
+            await get_owned(coll, i, c, include_deleted=True)
+        except HTTPException:
+            continue
+        await get_db()[coll].update_one({"_id": i}, {"$set": {"deleted_at": None, "deleted_by": None}})
+        await changed(c, coll, "created", i)
+        done.append(i)
+    return {"restored": done}
+
+
 @router.post("/trash/{coll}/{id}/restore")
 async def restore(coll: str, id: str, c: dict = Depends(ctx)):
     if coll not in TRASHABLE:

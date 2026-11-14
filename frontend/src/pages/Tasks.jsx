@@ -1,9 +1,10 @@
-import { useState } from 'react'
-import { Plus, Tag, Check, HandMetal } from 'lucide-react'
+import { Fragment, useState } from 'react'
+import { Plus, Tag, Check, HandMetal, ListChecks } from 'lucide-react'
 import { api } from '../api'
 import { PageHeader } from '../components/ui'
 import { useApp } from '../state'
 import { useLive } from '../hooks'
+import { SelectBar, SelectMark, useSelect } from '../select'
 import Sheet from '../components/Sheet'
 
 const dueLabel = (due, today) => {
@@ -80,11 +81,18 @@ export default function Tasks() {
   const nudge = async (t) => {
     try { await api.post(`/tasks/${t.id}/nudge`); showToast(`Sollecito inviato a ${partner.name} 😏`); reload() } catch (e) { showToast(e.message) }
   }
+  const sel = useSelect('tasks', visible.map((t) => t.id), reload)
   const catOf = (id) => (cats || []).find((c) => c.id === id)
 
   const Item = ({ t }) => {
     const c = catOf(t.category_id), late = !t.done && t.due && t.due < today
     const canNudge = !t.done && partner && t.assignee && t.assignee !== user.id
+    if (sel.on) return (
+      <button onClick={() => sel.toggle(t.id)} className="card flex w-full items-center gap-3 !rounded-2xl !p-4 text-left">
+        <SelectMark checked={sel.ids.has(t.id)} />
+        <span className={`min-w-0 flex-1 truncate font-medium ${t.done ? 'text-mute line-through' : ''}`}>{t.title}</span>
+      </button>
+    )
     return (
       <div className="card flex items-start gap-3 !rounded-2xl !p-4">
         <button role="checkbox" aria-checked={t.done} aria-label={`Completa ${t.title}`} onClick={() => toggle(t)}
@@ -105,19 +113,20 @@ export default function Tasks() {
 
   return (
     <div className="space-y-4">
-      <PageHeader eyebrow="Da fare" title="Attività" action={<><button aria-label="Categorie" className="icon-btn-soft" onClick={() => setSheet({ cats: true })}><Tag size={19} strokeWidth={1.6} /></button><button aria-label="Nuova attività" className="icon-btn" onClick={() => setSheet({})}><Plus size={22} /></button></>} />
+      <PageHeader eyebrow="Da fare" title="Attività" action={<><button aria-label="Seleziona" className="icon-btn-soft" onClick={() => (sel.on ? sel.stop() : sel.start())}><ListChecks size={19} strokeWidth={1.6} /></button><button aria-label="Categorie" className="icon-btn-soft" onClick={() => setSheet({ cats: true })}><Tag size={19} strokeWidth={1.6} /></button><button aria-label="Nuova attività" className="icon-btn" onClick={() => setSheet({})}><Plus size={22} /></button></>} />
       <div className="flex gap-2 overflow-x-auto" role="tablist">
         {[['tutte', 'Tutte'], [user.id, 'Mie'], ...(partner ? [[partner.id, `Di ${partner.name}`]] : [])].map(([k, l]) => (
           <button key={k} role="tab" aria-selected={who === k} onClick={() => setWho(k)} className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium ${who === k ? 'bg-accent text-accent-ink' : 'bg-card text-mute ring-1 ring-line'}`}>{l}</button>
         ))}
       </div>
-      {tasks === null ? <div className="skeleton" aria-busy="true"><i /><i /><i /></div> : open.length === 0 ? <div className="card text-center text-mute">Tutto fatto! 🎉<br />Niente da fare per ora.</div> : <div className="space-y-2">{open.map((t) => <Item key={t.id} t={t} />)}</div>}
+      {tasks === null ? <div className="skeleton" aria-busy="true"><i /><i /><i /></div> : open.length === 0 ? <div className="card text-center text-mute">Tutto fatto! 🎉<br />Niente da fare per ora.</div> : <div className="space-y-2">{open.map((t) => <Fragment key={t.id}>{Item({ t })}</Fragment>)}</div>}
       {done.length > 0 && (
         <>
           <button className="text-sm font-semibold text-mute" onClick={() => setShowDone(!showDone)}>{showDone ? '▾' : '▸'} Completate ({done.length})</button>
-          {showDone && <div className="space-y-2">{done.map((t) => <Item key={t.id} t={t} />)}</div>}
+          {showDone && <div className="space-y-2">{done.map((t) => <Fragment key={t.id}>{Item({ t })}</Fragment>)}</div>}
         </>
       )}
+      <SelectBar sel={sel} />
       {sheet && !sheet.cats && <Sheet title={sheet.task ? 'Modifica attività' : 'Nuova attività'} onClose={() => setSheet(null)}><TaskForm task={sheet.task} cats={cats || []} onDone={() => { setSheet(null); reload() }} /></Sheet>}
       {sheet?.cats && <Sheet title="Categorie" onClose={() => setSheet(null)}><Cats cats={cats || []} onChange={() => { reloadCats(); reload() }} /></Sheet>}
     </div>

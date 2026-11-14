@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
-import { Plus, ChevronLeft, ChevronRight, Repeat } from 'lucide-react'
+import { Plus, ChevronLeft, ChevronRight, Repeat, ListChecks } from 'lucide-react'
 import { api } from '../api'
 import { PageHeader } from '../components/ui'
 import { useApp } from '../state'
 import { useLive, iso } from '../hooks'
+import { SelectBar, SelectMark, useSelect } from '../select'
 import Sheet from '../components/Sheet'
 
 export const CATS = { noi: ['Noi', '#C2603F'], lavoro: ['Lavoro', '#4F8FA8'], famiglia: ['Famiglia', '#6E9B6B'], amici: ['Amici', '#D49A3A'], viaggi: ['Viaggi', '#8B6BB1'], casa: ['Casa', '#7A6A5E'] }
@@ -65,17 +66,18 @@ function EventForm({ event, day, onDone }) {
   )
 }
 
-export function EventRow({ e, onClick, showDate }) {
+export function EventRow({ e, onClick, showDate, selecting, selected }) {
   const [, color] = CATS[e.category] || CATS.noi
   const d = new Date(e.start.slice(0, 10) + 'T12:00:00')
   return (
     <button onClick={onClick} className="card flex w-full items-center gap-3 !rounded-2xl !p-4 text-left">
+      {selecting && <SelectMark checked={selected} />}
       <span className="h-10 w-1.5 shrink-0 rounded-full" style={{ background: color }} />
       <span className="min-w-0 flex-1">
         <span className="block truncate font-medium">{e.type === 'compleanno' ? '🎂 ' : e.type === 'anniversario' ? '💞 ' : ''}{e.title}</span>
         <span className="block truncate text-sm text-mute">{showDate && `${d.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' })} · `}{timeOf(e)}{e.location ? ` · ${e.location}` : ''}</span>
       </span>
-      {e.is_recurring && <Repeat aria-label="Si ripete" size={16} className="text-mute" />}
+      {e.is_recurring && !selecting && <Repeat aria-label="Si ripete" size={16} className="text-mute" />}
     </button>
   )
 }
@@ -102,6 +104,8 @@ export default function Calendar() {
   const dayEvents = byDay[sel] || []
   const monthEvents = (data || []).filter((e) => e.start.slice(0, 7) === `${y}-${String(m + 1).padStart(2, '0')}`)
   const done = () => { setSheet(null); reload() }
+  const pick = useSelect('events', [...new Set([...dayEvents, ...monthEvents].map((e) => e.id))], reload)
+  const row = (e, k, showDate) => <EventRow key={k} e={e} showDate={showDate} selecting={pick.on} selected={pick.ids.has(e.id)} onClick={() => (pick.on ? pick.toggle(e.id) : setSheet({ event: e }))} />
 
   return (
     <div className="space-y-4">
@@ -125,18 +129,19 @@ export default function Calendar() {
       </div>
       <div className="flex items-center justify-between">
         <h2 className="display text-2xl">{new Date(sel + 'T12:00').toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' })}</h2>
-        <button aria-label="Nuovo evento" className="icon-btn" onClick={() => setSheet({})}><Plus size={22} /></button>
+        <div className="flex gap-2"><button aria-label="Seleziona" className="icon-btn-soft" onClick={() => (pick.on ? pick.stop() : pick.start())}><ListChecks size={20} strokeWidth={1.6} /></button><button aria-label="Nuovo evento" className="icon-btn" onClick={() => setSheet({})}><Plus size={22} /></button></div>
       </div>
       <div className="space-y-2">
         {dayEvents.length === 0 && <p className="text-mute">Niente in programma per questo giorno.</p>}
-        {dayEvents.map((e) => <EventRow key={e.key} e={e} onClick={() => setSheet({ event: e })} />)}
+        {dayEvents.map((e) => row(e, e.key))}
       </div>
       {monthEvents.length > 0 && (
         <>
           <h2 className="eyebrow pt-2">Agenda di {MONTHS[m]}</h2>
-          <div className="space-y-2">{monthEvents.map((e) => <EventRow key={'a' + e.key} e={e} showDate onClick={() => setSheet({ event: e })} />)}</div>
+          <div className="space-y-2">{monthEvents.map((e) => row(e, 'a' + e.key, true))}</div>
         </>
       )}
+      <SelectBar sel={pick} />
       {sheet && <Sheet title={sheet.event ? 'Modifica evento' : 'Nuovo evento'} onClose={() => setSheet(null)}><EventForm event={sheet.event} day={sel} onDone={done} /></Sheet>}
     </div>
   )

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { Plus, ExternalLink, Gift, Check, Trash2, EyeOff } from 'lucide-react'
 import { api } from '../api'
 import { useApp } from '../state'
@@ -71,7 +71,7 @@ export default function Desideri() {
       </div>
       {tab === 'loro' && <p className="text-sm text-mute">Tocca «Lo regalo io» per non regalare la stessa cosa: {partner?.name} non vedrà mai chi l'ha prenotato.</p>}
       {tab === 'radar' && <p className="flex items-start gap-2 text-sm text-mute"><EyeOff size={16} className="mt-0.5 shrink-0" />Le tue idee segrete per {partner?.name}: le vedi solo tu.</p>}
-      {data === null ? <div className="skeleton" aria-busy="true"><i /><i /><i /></div> : list.length === 0 ? <div className="card text-center text-mute">{tab === 'miei' ? 'Ancora nessun desiderio. Cosa ti farebbe felice?' : tab === 'loro' ? `${partner?.name} non ha ancora aggiunto nulla.` : 'Nessuna idea segreta. Annota qui ciò che noti!'}</div> : <div className="space-y-2">{list.map((w) => <Item key={w.id} w={w} />)}</div>}
+      {data === null ? <div className="skeleton" aria-busy="true"><i /><i /><i /></div> : list.length === 0 ? <div className="card text-center text-mute">{tab === 'miei' ? 'Ancora nessun desiderio. Cosa ti farebbe felice?' : tab === 'loro' ? `${partner?.name} non ha ancora aggiunto nulla.` : 'Nessuna idea segreta. Annota qui ciò che noti!'}</div> : <div className="space-y-2">{list.map((w) => <Fragment key={w.id}>{Item({ w })}</Fragment>)}</div>}
       {sheet && <Sheet title={sheet.item ? 'Modifica' : sheet.forPartner ? 'Nuova idea regalo' : 'Nuovo desiderio'} onClose={() => setSheet(null)}><Form item={sheet.item} forPartner={sheet.forPartner} onDone={() => { setSheet(null); reload() }} /></Sheet>}
     </div>
   )

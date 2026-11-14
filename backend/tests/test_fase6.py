@@ -125,3 +125,19 @@ async def test_notifica_di_prova_riporta_l_esito(duo, monkeypatch):
     monkeypatch.setattr(push, "_send", lambda *x: 403)
     r = (await c.post("/api/push/test", headers=H(a))).json()
     assert not r["results"][0]["ok"] and r["results"][0]["status"] == 403
+
+
+async def test_eliminazione_multipla_con_ripristino(duo):
+    c, a, b = duo
+    ids = []
+    for t in ("Uno", "Due", "Tre"):
+        ids.append((await c.post("/api/tasks", headers=H(a), json={"title": t})).json()["id"])
+    r = await c.post("/api/bulk/tasks/delete", headers=H(a), json={"ids": ids[:2] + ["inesistente", ids[0]]})
+    assert sorted(r.json()["deleted"]) == sorted(ids[:2])
+    assert [t["title"] for t in (await c.get("/api/tasks", headers=H(b))).json()] == ["Tre"]  # sparite anche per il partner
+    r = await c.post("/api/bulk/tasks/restore", headers=H(a), json={"ids": ids[:2]})
+    assert len(r.json()["restored"]) == 2 and len((await c.get("/api/tasks", headers=H(a))).json()) == 3
+    assert (await c.post("/api/bulk/vault/delete", headers=H(a), json={"ids": ["x"]})).status_code == 404
+    assert (await c.post("/api/bulk/tasks/delete", headers=H(a), json={"ids": []})).status_code == 422
+    ev = (await c.post("/api/events", headers=H(a), json={"title": "Inutile", "start": "2030-01-01T10:00"})).json()["id"]
+    assert (await c.post("/api/bulk/events/delete", headers=H(b), json={"ids": [ev]})).json()["deleted"] == [ev]
