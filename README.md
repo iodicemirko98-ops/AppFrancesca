@@ -54,3 +54,12 @@ Il piano gratuito di Render mette il server in pausa dopo 15 minuti: il primo ac
 
 ## Privacy
 Nessuna pubblicità né analytics di terzi. Le registrazioni si chiudono dopo due account (`MAX_USERS`).
+
+
+## Fase 6 — offline, notifiche push, rifiniture
+
+- **Offline**: l'app si apre anche senza rete con gli ultimi dati letti (IndexedDB). Attività e voci delle liste si possono creare, spuntare ed eliminare offline: le modifiche restano in coda, un banner le segnala e vengono inviate al ritorno della connessione. Cassaforte, ciclo, export e login non vengono mai salvati in locale; all'uscita la copia locale viene cancellata.
+- **Notifiche push** (Web Push, chiavi VAPID generate automaticamente e salvate nel database): si attivano da *Impostazioni → Notifiche → Su questo dispositivo*. Su iPhone serve prima «Aggiungi a Home». Endpoint: `/api/push/key|subscribe|unsubscribe|status`.
+- **Promemoria automatici** (scheduler interno, ogni minuto, senza duplicati): promemoria degli eventi con orario, domanda del giorno dopo le 19 a chi non ha risposto, attività in scadenza oggi dalle 8.
+- **Render piano gratuito**: il servizio si addormenta dopo 15 minuti, e con lui lo scheduler. Per promemoria puntuali fai chiamare `https://noidue-api.onrender.com/health` ogni 5–10 minuti (UptimeRobot gratuito, oppure una GitHub Action con cron).
+- Animazioni di entrata leggere, disattivate con `prefers-reduced-motion`.

@@ -53,3 +53,10 @@ input, textarea, select { font-size: 16px; } /* niente zoom automatico su iPhone
   .input { @apply w-full rounded-2xl border-0 bg-soft px-4 py-3 text-ink ring-1 ring-line placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-accent; }
   .label { @apply mb-1.5 block text-sm font-medium text-mute; }
 }
+
+/* Fase 6: entrata morbida delle pagine; nessuna animazione per chi la preferisce ridotta */
+@keyframes noidue-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+main > * { animation: noidue-in .28s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}

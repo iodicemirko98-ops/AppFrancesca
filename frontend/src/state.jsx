@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
-import { api, getToken, setToken, wsUrl } from './api'
+import { api, getToken, setToken, wsUrl, setCurrentUser, resetOffline } from './api'
+import { flush, onFlushed } from './offline'
 import { applyTheme } from './util'
 
 const Ctx = createContext(null)
@@ -13,6 +14,7 @@ export function AppProvider({ children }) {
   const loadAll = useCallback(async () => {
     const [u, h] = await Promise.all([api.get('/me'), api.get('/home')])
     setUser(u)
+    setCurrentUser(u.id)
     setHome(h)
     applyTheme(u.theme)
     return u
@@ -36,6 +38,7 @@ export function AppProvider({ children }) {
   const subs = useRef(new Set())
   const subscribe = useCallback((fn) => { subs.current.add(fn); return () => subs.current.delete(fn) }, [])
   const userId = user?.id
+  useEffect(() => { onFlushed(() => { subs.current.forEach((f) => f({ entity: '*' })); loadAll().catch(() => {}) }) }, [loadAll])
   useEffect(() => {
     if (!userId) return
     let ws, timer, ping, tries = 0, stopped = false
@@ -44,6 +47,7 @@ export function AppProvider({ children }) {
       ws = new WebSocket(wsUrl(getToken()))
       ws.onopen = () => {
         if (tries > 0) { fire({ entity: '*' }); loadAll().catch(() => {}) } // dopo una pausa: rileggi tutto
+        flush()
         tries = 0
         ping = setInterval(() => ws.readyState === 1 && ws.send('ping'), 25000)
       }
@@ -82,7 +86,7 @@ export function AppProvider({ children }) {
     couple: home?.couple,
     login: (email, password) => enter('/auth/login', { email, password }),
     register: (b) => enter('/auth/register', b),
-    logout: () => { setToken(null); setUser(null); setHome(null) },
+    logout: () => { setToken(null); setUser(null); setHome(null); resetOffline() },
     reload: loadAll,
     saveProfile: async (patch) => { const u = await api.patch('/me', patch); setUser(u); if (patch.theme) applyTheme(u.theme); await loadAll() },
     saveCouple: async (patch) => { await api.patch('/couple', patch); await loadAll() },

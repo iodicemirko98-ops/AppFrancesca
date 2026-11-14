@@ -32,6 +32,8 @@ const Tab = ({ to, icon: Icon, label, active }) => (
   </NavLink>
 )
 
+import OfflineBanner from './components/OfflineBanner'
+
 function Toast() {
   const { toast, closeToast } = useApp()
   if (!toast) return null
@@ -53,6 +55,7 @@ export default function App() {
   const inNav = pathname === '/' || navItems.some((x) => pathname.startsWith(x.path))
   return (
     <div className="mx-auto min-h-screen max-w-md">
+      <OfflineBanner />
       <main className="px-4 pb-32 pt-[max(1.25rem,env(safe-area-inset-top))]">
         <Routes>
           <Route path="/" element={<Home />} />

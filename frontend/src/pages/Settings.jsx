@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { disablePush, enablePush, isIOS, isStandalone, pushState } from '../push'
 import { useApp } from '../state'
 import { api } from '../api'
 import { Avatar, PageHeader, Row, Toggle } from '../components/ui'
@@ -39,6 +40,9 @@ export default function Settings() {
     setErr(''); setMsg('')
     try { await fn(...a); if (ok) setMsg(ok) } catch (e) { setErr(e.message) }
   }
+  const [push, setPush] = useState('...')
+  useEffect(() => { pushState().then(setPush).catch(() => setPush('unsupported')) }, [])
+  const togglePush = run(async (v) => { if (v) await enablePush(); else await disablePush(); setPush(await pushState()) })
   const me = couple.members.find((m) => m.id === user.id)
   const notif = user.notifications
 
@@ -95,6 +99,9 @@ export default function Settings() {
       <Section title="Notifiche">
         <Row title="Notifiche attive" hint="Interruttore generale">
           <Toggle label="Notifiche attive" checked={notif.master} onChange={run((v) => saveProfile({ notifications: { master: v } }))} />
+        </Row>
+        <Row title="Su questo dispositivo" hint={push === 'unsupported' ? (isIOS() && !isStandalone() ? 'Su iPhone: Condividi → «Aggiungi a Home», poi riapri l\'app da lì' : 'Non supportato da questo browser') : push === 'denied' ? 'Bloccate: abilitale dalle impostazioni del browser' : 'Ricevi promemoria anche ad app chiusa'}>
+          <Toggle label="Notifiche su questo dispositivo" checked={push === 'on'} disabled={push === 'unsupported' || push === 'denied' || push === '...'} onChange={togglePush} />
         </Row>
         {Object.entries(NOTIFS).map(([k, l]) => (
           <Row key={k} title={l}>

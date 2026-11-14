@@ -1,3 +1,5 @@
+import { cacheGet, cachePut, enqueue, flush, queueable, setSender, clearOffline } from './offline'
+
 const BASE = import.meta.env.VITE_API_URL || ''
 
 export const getToken = () => localStorage.getItem('token')
@@ -14,7 +16,34 @@ export class ApiError extends Error {
   }
 }
 
+let currentUserId = null
+export const setCurrentUser = (id) => { currentUserId = id }
+export const resetOffline = () => clearOffline()
+
 async function request(method, path, body) {
+  // modifiche a elementi ancora provvisori (creati offline): restano in coda finché il server non li conosce
+  if (method !== 'GET' && path.includes('tmp-') && queueable(method, path)) {
+    const r = await enqueue(method, path, body, currentUserId)
+    if (r.ok) { flush(); return r.data }
+  }
+  try {
+    const data = await network(method, path, body)
+    if (method === 'GET' && data !== null) cachePut(path, data)
+    return data
+  } catch (e) {
+    if (e.status !== 0) throw e
+    if (method === 'GET') {
+      const c = await cacheGet(path)
+      if (c !== undefined) return c
+    } else if (queueable(method, path)) {
+      const r = await enqueue(method, path, body, currentUserId)
+      if (r.ok) return r.data
+    }
+    throw e
+  }
+}
+
+async function network(method, path, body) {
   let res
   try {
     res = await fetch(BASE + '/api' + path, {
@@ -44,6 +73,8 @@ function validationMessage(errors) {
   const names = { email: "L'email non è valida", password: 'La password deve avere almeno 8 caratteri', name: 'Inserisci un nome' }
   return names[f] || 'Controlla i dati inseriti'
 }
+
+setSender((m, p, b) => network(m, p, b))
 
 export const api = {
   get: (p) => request('GET', p),

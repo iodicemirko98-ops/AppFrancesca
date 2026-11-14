@@ -6,7 +6,11 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
       registerType: 'autoUpdate',
+      injectManifest: { globPatterns: ['**/*.{js,css,html,svg,png,woff2,woff}'] },
       includeAssets: ['apple-touch-icon.png', 'icon.svg'],
       manifest: {
         name: 'NoiDue',
@@ -22,10 +26,6 @@ export default defineConfig({
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
-      },
-      workbox: {
-        navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api/],
       },
     }),
   ],
