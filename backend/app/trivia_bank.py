@@ -9,7 +9,11 @@ CATEGORIES = {
     "cibo": ("Cibo e cucina", "🍝"),
     "arte": ("Arte e letteratura", "🎨"),
     "natura": ("Natura e animali", "🐾"),
+    "harry_potter": ("Harry Potter", "⚡"),
 }
+
+# categorie a tema: non entrano nel «mix»
+THEMED = {"harry_potter"}
 
 _RAW = {
     "geografia": [
@@ -177,8 +181,14 @@ _RAW = {
     ],
 }
 
+from .trivia_hp import HP  # noqa: E402
+
+_RAW["harry_potter"] = [(q, r, w) for q, r, w, _t, _f in HP]
+
 QUESTIONS: dict[str, dict] = {}
 for _cat, _items in _RAW.items():
     for _i, (_q, _right, _wrong) in enumerate(_items, 1):
         _id = f"{_cat[:3]}{_i:02d}"
-        QUESTIONS[_id] = {"id": _id, "cat": _cat, "q": _q, "right": _right, "wrong": _wrong}
+        QUESTIONS[_id] = {"id": _id, "cat": _cat, "q": _q, "right": _right, "wrong": _wrong, "tag": None, "fact": None}
+for _i, (_q, _r, _w, _tag, _fact) in enumerate(HP, 1):
+    QUESTIONS[f"har{_i:02d}"].update(tag=_tag, fact=_fact)

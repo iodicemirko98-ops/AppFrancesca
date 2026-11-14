@@ -9,6 +9,11 @@ import { PageHeader } from '../components/ui'
 const TIME_MS = 15000
 const catInfo = (cats, id) => (id === 'mix' ? { name: 'Mix', emoji: '🎲' } : cats.find((c) => c.id === id) || { name: 'Trivia', emoji: '❓' })
 
+const TAGS = { 'Curiosità': '💡 Curiosità', Libri: '📖 Libri', Film: '🎬 Film', Magia: '✨ Magia', Trama: '📜 Trama' }
+const RANKS = [[10, 'Mago del secolo 🧙'], [8, 'Auror del Ministero 🪄'], [6, 'Prefetto di Hogwarts 🎖️'], [4, 'Studente modello 📚'], [2, 'Primo anno 🧹'], [0, 'Babbano 🫏']]
+const rankOf = (n) => RANKS.find(([min]) => n >= min)[1]
+const HP_BG = 'linear-gradient(135deg,#2a1a4a 0%,#5b2a86 55%,#c9962b 130%)'
+
 export function TriviaHome() {
   const { couple, user, showToast } = useApp()
   const nav = useNavigate()
@@ -44,8 +49,15 @@ export function TriviaHome() {
       )}
       <div>
         <h2 className="eyebrow mb-2 px-1">Scegli un argomento</h2>
+        {cats.filter((c) => c.themed).map((c) => (
+          <button key={c.id} disabled={busy} onClick={() => start(c.id)} className="mb-2 flex w-full items-center gap-4 rounded-3xl p-5 text-left text-white shadow-lg" style={{ background: HP_BG }}>
+            <span className="text-4xl" aria-hidden>{c.emoji}</span>
+            <span className="min-w-0 flex-1"><span className="display block text-2xl leading-tight">{c.name}</span>
+              <span className="text-sm opacity-90">Libri, film, magia e curiosità · {c.count} domande</span></span>
+          </button>
+        ))}
         <div className="grid grid-cols-2 gap-2">
-          {[{ id: 'mix', name: 'Un po\' di tutto', emoji: '🎲' }, ...cats].map((c) => (
+          {[{ id: 'mix', name: 'Un po\' di tutto', emoji: '🎲' }, ...cats.filter((c) => !c.themed)].map((c) => (
             <button key={c.id} disabled={busy} onClick={() => start(c.id)} className="card flex items-center gap-3 !rounded-2xl !p-4 text-left">
               <span className="text-2xl" aria-hidden>{c.emoji}</span><span className="font-medium leading-tight">{c.name}</span>
             </button>
@@ -99,18 +111,20 @@ export function TriviaMatch() {
     return () => clearInterval(t)
   }, [playing, idx, fb]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const next = async (done) => {
+    setFb(null); lock.current = false
+    if (done) await reload()
+    setIdx((i) => i + 1)
+  }
+
   const submit = async (choice) => {
     if (lock.current) return
     lock.current = true
     const ms = Date.now() - t0.current
     try {
       const r = await api.post(`/trivia/matches/${id}/answer`, { q: idx, choice, ms })
-      setFb({ choice, right: r.right, points: r.points })
-      setTimeout(async () => {
-        setFb(null); lock.current = false
-        if (r.done) await reload()
-        setIdx((i) => i + 1)
-      }, 1300)
+      setFb({ choice, right: r.right, points: r.points, fact: r.fact, done: r.done })
+      if (!r.fact) setTimeout(next, 1300, r.done)
     } catch (e) {
       lock.current = false
       if (e.status === 409) { await reload(); setIdx(null) } else showToast(e.message)
@@ -136,7 +150,8 @@ export function TriviaMatch() {
           <div className={`h-full rounded-full ${urgent ? 'bg-red-500' : 'bg-accent'}`} style={{ width: `${(left / TIME_MS) * 100}%`, transition: 'width .1s linear' }} />
         </div>
         <div key={idx} className="space-y-4" style={{ animation: 'noidue-fade .25s ease-out both' }}>
-          <div className="card"><h1 className="display text-[1.7rem] leading-snug">{q.q}</h1></div>
+          <div className="card">{q.tag && <span className="mb-2 inline-block rounded-full bg-soft px-3 py-1 text-xs font-semibold text-mute">{TAGS[q.tag] || q.tag}</span>}
+            <h1 className="display text-[1.7rem] leading-snug">{q.q}</h1></div>
           <div className="space-y-2">
             {q.options.map((o, i) => {
               const state = !fb ? '' : i === fb.right ? 'ring-2 ring-green-600 bg-green-500/15' : i === fb.choice ? 'ring-2 ring-red-500 bg-red-500/15' : 'opacity-50'
@@ -152,6 +167,13 @@ export function TriviaMatch() {
             })}
           </div>
           {fb && <p className="text-center font-semibold">{fb.points > 0 ? `+${fb.points} punti` : fb.choice === null ? 'Tempo scaduto!' : 'Peccato!'}</p>}
+          {fb?.fact && (
+            <div className="rounded-3xl p-4 text-white" style={{ background: HP_BG, animation: 'noidue-fade .3s ease-out both' }}>
+              <div className="eyebrow !text-white/80">⚡ Lo sapevi?</div>
+              <p className="mt-1 leading-snug">{fb.fact}</p>
+              <button onClick={() => next(fb.done)} className="mt-3 w-full rounded-2xl bg-white/20 py-2.5 font-semibold backdrop-blur-0">Avanti</button>
+            </div>
+          )}
         </div>
       </div>
     )
@@ -159,6 +181,9 @@ export function TriviaMatch() {
 
   // risultati
   const mine = data.score ?? 0
+  const hp = data.cat === 'harry_potter'
+  const rights = data.questions.filter((q) => q.mine === q.right).length
+  const pRights = data.partner_choices ? data.questions.filter((q, i) => data.partner_choices[i] === q.right).length : 0
   const verdict = !data.finished ? null : data.winner === null ? 'Pareggio! 🤝' : data.winner === user.id ? 'Hai vinto! 🏆' : `Ha vinto ${partner?.name} 👏`
   return (
     <div className="space-y-4">
@@ -181,6 +206,14 @@ export function TriviaMatch() {
           </>
         )}
       </div>
+      {hp && (
+        <div className="rounded-3xl p-5 text-center text-white" style={{ background: HP_BG }}>
+          <div className="eyebrow !text-white/80">Il Cappello Parlante dice</div>
+          <div className="display mt-1 text-2xl">{rankOf(rights)}</div>
+          <p className="text-sm opacity-90">{rights}/{data.total} risposte giuste</p>
+          {data.finished && partner && <p className="mt-2 text-sm opacity-90">{partner.name}: {rankOf(pRights)} ({pRights}/{data.total})</p>}
+        </div>
+      )}
       <h2 className="eyebrow px-1">Domande</h2>
       <div className="space-y-2">
         {data.questions.map((q, i) => {
@@ -189,6 +222,7 @@ export function TriviaMatch() {
             <div key={i} className="card !rounded-2xl !p-4">
               <p className="font-medium">{i + 1}. {q.q}</p>
               <p className="mt-1 text-sm text-green-700 dark:text-green-400">✓ {q.options[q.right]}</p>
+              {q.fact && <p className="mt-1 text-sm">⚡ {q.fact}</p>}
               <p className="text-sm text-mute">
                 Tu: {q.mine === null || q.mine === undefined ? 'nessuna risposta' : q.options[q.mine]} {ok ? '✅' : '❌'}
                 {data.finished && partner && <> · {partner.name}: {pc === null || pc === undefined ? 'nessuna risposta' : q.options[pc]} {pc === q.right ? '✅' : '❌'}</>}

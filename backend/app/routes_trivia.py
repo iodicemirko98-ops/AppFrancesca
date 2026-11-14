@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 from .db import get_db
 from .routes_planner import changed, ctx, new_id, notify, now
-from .trivia_bank import CATEGORIES, QUESTIONS
+from .trivia_bank import CATEGORIES, QUESTIONS, THEMED
 
 router = APIRouter(prefix="/api/trivia")
 
@@ -56,10 +56,10 @@ async def view(m: dict, c: dict, members: list[str]) -> dict:
     for i, qid in enumerate(m["qids"]):
         q = QUESTIONS[qid]
         opts, right = options_for(m["_id"], q)
-        item = {"q": q["q"], "options": opts}
+        item = {"q": q["q"], "options": opts, "tag": q["tag"]}
         if i < len(mine["answers"]):  # solo dopo aver risposto si vede la soluzione
             a = mine["answers"][i]
-            item.update(right=right, mine=a["c"], points=a["pts"])
+            item.update(right=right, mine=a["c"], points=a["pts"], fact=q["fact"])
         qs.append(item)
     all_done = all(is_done(m, u) for u in members)
     out = {
@@ -83,7 +83,7 @@ async def categories(c: dict = Depends(ctx)):
     counts: dict[str, int] = {}
     for q in QUESTIONS.values():
         counts[q["cat"]] = counts.get(q["cat"], 0) + 1
-    return [{"id": k, "name": v[0], "emoji": v[1], "count": counts[k]} for k, v in CATEGORIES.items()]
+    return [{"id": k, "name": v[0], "emoji": v[1], "count": counts[k], "themed": k in THEMED} for k, v in CATEGORIES.items()]
 
 
 @router.post("/matches", status_code=201)
@@ -92,7 +92,7 @@ async def create_match(body: NewMatch, c: dict = Depends(ctx)):
         raise HTTPException(422, "Categoria non valida")
     db = get_db()
     recent = {qid async for m in db.trivia_matches.find({"couple_id": c["cid"]}).sort("created_at", -1).limit(8) for qid in m["qids"]}
-    pool = [q["id"] for q in QUESTIONS.values() if body.cat == "mix" or q["cat"] == body.cat]
+    pool = [q["id"] for q in QUESTIONS.values() if (q["cat"] not in THEMED if body.cat == "mix" else q["cat"] == body.cat)]
     fresh = [q for q in pool if q not in recent]
     pick_from = fresh if len(fresh) >= N_QUESTIONS else pool
     qids = random.sample(pick_from, min(N_QUESTIONS, len(pick_from)))
@@ -182,4 +182,4 @@ async def answer(id: str, body: AnswerIn, c: dict = Depends(ctx)):
     await changed(c, "trivia", "updated", id)
     if last and finished and c["partner_id"]:
         await notify(c, "trivia", f"Sfida Trivia conclusa! {c['user']['name']} ha finito: guarda i risultati.", f"/trivia/{id}")
-    return {"ok": ok, "right": right, "points": pts, "done": last, "finished": finished}
+    return {"ok": ok, "right": right, "points": pts, "done": last, "finished": finished, "fact": q["fact"]}

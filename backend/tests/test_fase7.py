@@ -31,7 +31,7 @@ async def test_domande_e_punti():
 async def test_sfida_risultati_nascosti_fino_alla_fine(duo):
     c, a, b = duo
     cats = (await c.get("/api/trivia/categories", headers=H(a))).json()
-    assert len(cats) == 8 and all(x["count"] >= 10 for x in cats)
+    assert len(cats) == 9 and all(x["count"] >= 10 for x in cats)
     assert (await c.post("/api/trivia/matches", headers=H(a), json={"cat": "boh"})).status_code == 422
     m = (await c.post("/api/trivia/matches", headers=H(a), json={"cat": "geografia"})).json()
     mid = m["id"]
@@ -108,3 +108,24 @@ async def test_album_foto_e_carosello(duo):
     assert {t["title"] for t in tr} == {"Roma", "Mare"}
     await c.post(f"/api/trash/photos/{p1['id']}/restore", headers=H(a))
     assert len((await c.get("/api/photos", headers=H(a))).json()) == 1
+
+
+async def test_harry_potter_con_lo_sapevi(duo):
+    from app.trivia_bank import QUESTIONS
+    c, a, b = duo
+    cats = {x["id"]: x for x in (await c.get("/api/trivia/categories", headers=H(a))).json()}
+    assert cats["harry_potter"]["themed"] and cats["harry_potter"]["count"] >= 40
+    m = (await c.post("/api/trivia/matches", headers=H(a), json={"cat": "harry_potter"})).json()
+    assert len(m["questions"]) == 10 and all(q["tag"] for q in m["questions"]) and "fact" not in m["questions"][0]
+    facts = 0
+    for i in range(10):
+        r = (await c.post(f"/api/trivia/matches/{m['id']}/answer", headers=H(a), json={"q": i, "choice": 0, "ms": 1000})).json()
+        facts += bool(r["fact"])
+    assert facts >= 3
+    v = (await c.get(f"/api/trivia/matches/{m['id']}", headers=H(a))).json()
+    assert sum(1 for q in v["questions"] if q.get("fact")) == facts
+    # il «mix» non pesca mai dalle categorie a tema
+    for _ in range(4):
+        mm = (await c.post("/api/trivia/matches", headers=H(a), json={"cat": "mix"})).json()
+        texts = {q["q"] for q in mm["questions"]}
+        assert not any(q["q"] in texts for q in QUESTIONS.values() if q["cat"] == "harry_potter")

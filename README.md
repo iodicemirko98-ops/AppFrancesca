@@ -76,3 +76,7 @@ Sezione **Trivia** (Altro → Trivia): sfide a due su 10 domande uguali per entr
 
 ### Le nostre foto
 Altro → «Le nostre foto»: album condiviso (fino a 80 foto, compresse sul telefono prima dell'invio). Le foto con la ★ compaiono nel **carosello della home** (massimo 12, scorre da solo ogni 5 secondi e col dito). Didascalie, selezione multipla con annulla, cestino di 7 giorni. API: `/api/photos`.
+
+
+### Trivia: Harry Potter
+Categoria a tema (54 domande: libri, film, magia, trama, curiosità), fuori dal «mix». Ogni domanda ha un'etichetta e molte hanno un «Lo sapevi?» mostrato dopo la risposta; a fine partita il Cappello Parlante assegna un grado in base alle risposte giuste.
