@@ -48,6 +48,8 @@ export function applyLook(next) {
     root.style.setProperty('--foto', `url(${foto})`)
     let dim = 55; try { dim = Number(localStorage.getItem('sfondo-dim') ?? 55) } catch { /* ignora */ }
     root.style.setProperty('--dim', String(dim / 100))
+    let ca = 62; try { ca = Number(localStorage.getItem('sfondo-card') ?? 62) } catch { /* ignora */ }
+    root.style.setProperty('--card-a', String(ca / 100))
   }
   const acc = look.hue === null ? (dark ? [30, 24, 21] : [194, 96, 63]) : (dark ? palette(look.hue, true).bg : palette(look.hue, false).accent)
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', hex(acc))
@@ -77,6 +79,7 @@ export function setBackgroundPhoto(file, max = 1100) {
   })
 }
 export const removeBackgroundPhoto = () => { try { localStorage.removeItem('sfondo-foto') } catch { /* ignora */ } }
+export const setCardOpacity = (v) => { try { localStorage.setItem('sfondo-card', String(v)) } catch { /* ignora */ } }
 export const setBackgroundDim = (v) => { try { localStorage.setItem('sfondo-dim', String(v)) } catch { /* ignora */ } }
 
 // Ridimensiona una foto a un quadrato (centrato) e la restituisce come data URL JPEG leggero.

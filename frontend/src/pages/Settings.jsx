@@ -3,7 +3,7 @@ import { disablePush, enablePush, isIOS, isStandalone, pushState } from '../push
 import { useApp } from '../state'
 import { api } from '../api'
 import { Avatar, PageHeader, Row, Toggle } from '../components/ui'
-import { applyLook, downloadBlob, getLook, removeBackgroundPhoto, resizeImage, setBackgroundDim, setBackgroundPhoto } from '../util'
+import { applyLook, downloadBlob, getLook, removeBackgroundPhoto, resizeImage, setBackgroundDim, setCardOpacity, setBackgroundPhoto } from '../util'
 
 const MODULES = {
   calendario: 'Calendario', attivita: 'Attività', liste: 'Liste', domanda: 'Domanda del giorno',
@@ -48,6 +48,7 @@ export default function Settings() {
   const saveT = useRef()
   const [dim, setDim] = useState(() => Number(localStorage.getItem('sfondo-dim') ?? 55))
   const [hasFoto, setHasFoto] = useState(() => !!localStorage.getItem('sfondo-foto'))
+  const [cardA, setCardA] = useState(() => Number(localStorage.getItem('sfondo-card') ?? 62))
   const photoRef = useRef()
   const changeLook = (patch, save = true) => {
     const n = { ...look, ...patch }
@@ -133,6 +134,9 @@ export default function Settings() {
                 <label className="label" htmlFor="dim">Quanto schiarire la foto</label>
                 <input id="dim" type="range" min="10" max="90" className="w-full accent-[rgb(var(--accent))]" value={dim}
                   onChange={(e) => { const v = Number(e.target.value); setDim(v); setBackgroundDim(v); applyLook() }} />
+                <label className="label" htmlFor="cardA">Trasparenza delle schede</label>
+                <input id="cardA" type="range" min="25" max="100" className="w-full accent-[rgb(var(--accent))]" value={cardA}
+                  onChange={(e) => { const v = Number(e.target.value); setCardA(v); setCardOpacity(v); applyLook() }} />
                 <div className="flex gap-4 text-sm font-semibold text-accent">
                   <button onClick={() => photoRef.current.click()}>Cambia foto</button>
                   <button onClick={() => { removeBackgroundPhoto(); setHasFoto(false); changeLook({ bg: 'nessuno' }) }}>Rimuovi</button>

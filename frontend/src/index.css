@@ -99,3 +99,12 @@ html[data-sfondo="foto"] body::before { content: ""; position: fixed; inset: 0; 
   background: linear-gradient(90deg, hsl(0 60% 55%), hsl(40 70% 52%), hsl(90 50% 45%), hsl(150 50% 42%), hsl(200 60% 50%), hsl(250 55% 58%), hsl(300 50% 55%), hsl(360 60% 55%)); }
 .hue-slider::-webkit-slider-thumb { -webkit-appearance: none; height: 28px; width: 28px; border-radius: 50%; background: rgb(var(--card)); border: 3px solid rgb(var(--ink)); box-shadow: 0 1px 4px rgb(0 0 0 / .3); }
 .hue-slider::-moz-range-thumb { height: 24px; width: 24px; border-radius: 50%; background: rgb(var(--card)); border: 3px solid rgb(var(--ink)); }
+
+/* con la foto: schede semitrasparenti a "vetro" per lasciarla intravedere */
+html[data-sfondo="foto"] .card,
+html[data-sfondo="foto"] .icon-btn-soft,
+html[data-sfondo="foto"] .chip-line,
+html[data-sfondo="foto"] nav > div {
+  background-color: rgb(var(--card) / var(--card-a, .62));
+  -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2);
+}
