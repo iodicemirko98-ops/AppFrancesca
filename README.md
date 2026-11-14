@@ -80,3 +80,6 @@ Altro → «Le nostre foto»: album condiviso (fino a 80 foto, compresse sul tel
 
 ### Trivia: Harry Potter
 Categoria a tema (54 domande: libri, film, magia, trama, curiosità), fuori dal «mix». Ogni domanda ha un'etichetta e molte hanno un «Lo sapevi?» mostrato dopo la risposta; a fine partita il Cappello Parlante assegna un grado in base alle risposte giuste.
+
+### Keep-alive
+Il workflow `.github/workflows/keepalive.yml` chiama `/health` ogni 5 minuti per evitare che Render free vada in sleep (serve anche allo scheduler delle notifiche). Alternativa: UptimeRobot.
