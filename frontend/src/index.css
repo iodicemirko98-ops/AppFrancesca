@@ -107,3 +107,6 @@ html[data-sfondo="foto"] nav > div { -webkit-backdrop-filter: none; backdrop-fil
 html { -webkit-tap-highlight-color: transparent; }
 button, a, [role="button"], [role="checkbox"], input, select { touch-action: manipulation; }
 .card, nav > div { contain: layout paint; }
+
+/* desktop: la foto di sfondo copre tutta la finestra, il contenuto sta nella colonna centrale */
+@media (min-width: 1024px) { html[data-sfondo="foto"] body::before { max-width: none; } }

@@ -55,7 +55,7 @@ export default function Home() {
   const dateLabel = new Date(home.today + 'T12:00').toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' })
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 lg:space-y-0 lg:[&>*]:min-w-0 lg:[&>header]:col-span-2 lg:[&>header]:mb-2">
       <header className="flex items-center gap-3">
         <div className="flex shrink-0"><Avatar person={me} size={48} /><div className="-ml-3"><Avatar person={partner || { name: '?' }} size={48} /></div></div>
         <div className="min-w-0 flex-1">

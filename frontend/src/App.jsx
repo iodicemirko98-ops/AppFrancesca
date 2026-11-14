@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { LayoutGrid, Home as HomeIcon } from 'lucide-react'
-import { SECTIONS } from './modules'
+import { SECTIONS, UTILITY } from './modules'
 import More from './pages/More'
 import { useApp } from './state'
 import { Spinner } from './components/ui'
@@ -32,6 +32,24 @@ const TriviaMatch = lazy(() => import('./pages/Trivia').then((m) => ({ default: 
 const Ricette = lazy(() => import('./pages/Ricette'))
 const Foto = lazy(() => import('./pages/Foto'))
 
+function Sidebar({ on, couple }) {
+  const items = SECTIONS.filter((x) => x.ready && (x.key === 'ciclo' ? couple.modules?.ciclo === true : on(x.key)))
+  const Link = ({ to, icon: Icon, label }) => (
+    <NavLink to={to} end={to === '/'} className={({ isActive }) => `flex items-center gap-3 rounded-2xl px-3 py-2 text-[15px] font-medium transition ${isActive ? 'bg-accent/15 text-accent' : 'text-mute hover:bg-soft'}`}>
+      <Icon size={19} strokeWidth={1.6} />{label}
+    </NavLink>
+  )
+  return (
+    <aside className="fixed inset-y-0 left-0 z-10 hidden w-64 flex-col gap-1 overflow-y-auto border-r border-line bg-card/80 px-3 py-6 lg:flex">
+      <div className="display mb-4 px-3 text-3xl">NoiDue</div>
+      <Link to="/" icon={HomeIcon} label="Home" />
+      {items.map((x) => <Link key={x.key} to={x.path} icon={x.icon} label={x.label} />)}
+      <div className="my-2 border-t border-line" />
+      {UTILITY.map((u) => <Link key={u.path} to={u.path} icon={u.icon} label={u.label} />)}
+    </aside>
+  )
+}
+
 const Tab = ({ to, icon: Icon, label, active }) => (
   <NavLink to={to} end={to === '/'} className={({ isActive }) => `flex flex-1 flex-col items-center gap-0.5 rounded-2xl py-2 text-[11px] font-medium transition ${(active ?? isActive) ? 'bg-accent/15 text-accent' : 'text-mute'}`}>
     <Icon size={22} strokeWidth={1.6} />{label}
@@ -60,9 +78,10 @@ export default function App() {
   const navItems = SECTIONS.filter((x) => x.nav && on(x.key))
   const inNav = pathname === '/' || navItems.some((x) => pathname.startsWith(x.path))
   return (
-    <div className="mx-auto min-h-screen max-w-md">
+    <div className="mx-auto min-h-screen max-w-md lg:ml-64 lg:max-w-none">
+      <Sidebar on={on} couple={couple} />
       <OfflineBanner />
-      <main className="px-4 pb-32 pt-[max(1.25rem,env(safe-area-inset-top))]">
+      <main className="px-4 pb-32 pt-[max(1.25rem,env(safe-area-inset-top))] lg:mx-auto lg:max-w-3xl lg:px-10 lg:pb-16 lg:pt-10">
         <Suspense fallback={<div className="skeleton" aria-busy="true"><i /><i /><i /></div>}>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -96,7 +115,7 @@ export default function App() {
         </Suspense>
       </main>
       <Toast />
-      <nav className="fixed inset-x-0 bottom-0 z-10 px-3" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
+      <nav className="fixed inset-x-0 bottom-0 z-10 px-3 lg:hidden" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
         <div className="mx-auto flex max-w-md gap-1 rounded-3xl bg-card/95 p-1.5 shadow-lg ring-1 ring-line ">
           <Tab to="/" icon={HomeIcon} label="Home" />
           {navItems.map((x) => <Tab key={x.path} to={x.path} icon={x.icon} label={x.label.split(' ')[0]} />)}
