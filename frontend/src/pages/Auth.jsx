@@ -1,3 +1,4 @@
+import { Heart } from 'lucide-react'
 import { useState } from 'react'
 import { useApp } from '../state'
 
@@ -25,8 +26,8 @@ export default function Auth() {
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-10">
       <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-accent text-3xl text-accent-ink">♡</div>
-        <h1 className="text-3xl font-bold">NoiDue</h1>
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-accent/15 text-accent"><Heart size={28} strokeWidth={1.5} /></div>
+        <h1 className="display text-5xl">NoiDue</h1>
         <p className="mt-1 text-mute">Il vostro spazio privato</p>
       </div>
 

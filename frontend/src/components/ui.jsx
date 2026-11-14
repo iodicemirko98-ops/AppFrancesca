@@ -35,3 +35,16 @@ export function Row({ title, hint, children }) {
 export function Spinner() {
   return <div className="flex min-h-[60vh] items-center justify-center text-mute">Un attimo…</div>
 }
+
+// Intestazione di pagina: etichetta piccola, titolo serif, azione a destra.
+export function PageHeader({ eyebrow, title, action, back }) {
+  return (
+    <header className="flex items-start justify-between gap-3">
+      <div className="min-w-0">
+        {eyebrow && <div className="eyebrow">{eyebrow}</div>}
+        <h1 className="display truncate text-[2.1rem] leading-tight">{title}</h1>
+      </div>
+      <div className="flex shrink-0 items-center gap-2 pt-1">{action}</div>
+    </header>
+  )
+}

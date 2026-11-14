@@ -1,3 +1,10 @@
+@import '@fontsource/cormorant-garamond/500.css';
+@import '@fontsource/cormorant-garamond/600.css';
+@import '@fontsource/cormorant-garamond/500-italic.css';
+@import '@fontsource/outfit/400.css';
+@import '@fontsource/outfit/500.css';
+@import '@fontsource/outfit/600.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -26,13 +33,20 @@
 html, body, #root { min-height: 100%; }
 body {
   @apply bg-bg font-sans text-ink antialiased;
+  font-feature-settings: 'lnum';
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
 }
 input, textarea, select { font-size: 16px; } /* niente zoom automatico su iPhone */
 
 @layer components {
-  .card { @apply rounded-3xl bg-card p-5 shadow-sm ring-1 ring-line; }
+  .card { @apply rounded-3xl bg-card p-5 ring-1 ring-line; }
+  .eyebrow { @apply text-[11px] font-medium uppercase tracking-[.2em] text-mute; }
+  .display { @apply font-display font-medium; }
+  .chip { @apply inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1.5 text-sm font-medium text-accent; }
+  .chip-line { @apply inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-sm ring-1 ring-line; }
+  .icon-btn { @apply inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent text-accent-ink transition active:scale-95; }
+  .icon-btn-soft { @apply inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-card ring-1 ring-line transition active:scale-95; }
   .btn { @apply inline-flex items-center justify-center rounded-2xl bg-accent px-5 py-3 font-semibold text-accent-ink transition active:scale-[.98] disabled:opacity-50; }
   .btn-soft { @apply inline-flex items-center justify-center rounded-2xl bg-soft px-5 py-3 font-semibold text-ink transition active:scale-[.98] disabled:opacity-50; }
   .btn-danger { @apply inline-flex items-center justify-center rounded-2xl px-5 py-3 font-semibold text-red-600 ring-1 ring-red-300 transition active:scale-[.98] dark:text-red-400 dark:ring-red-500/40; }

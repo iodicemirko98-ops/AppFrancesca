@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { Plus, Tag, Check, HandMetal } from 'lucide-react'
 import { api } from '../api'
+import { PageHeader } from '../components/ui'
 import { useApp } from '../state'
 import { useLive } from '../hooks'
 import Sheet from '../components/Sheet'
@@ -81,11 +83,11 @@ export default function Tasks() {
     const c = catOf(t.category_id), late = !t.done && t.due && t.due < today
     const canNudge = !t.done && partner && t.assignee && t.assignee !== user.id
     return (
-      <div className="flex items-start gap-3 rounded-2xl bg-soft px-4 py-3">
+      <div className="card flex items-start gap-3 !rounded-2xl !p-4">
         <button role="checkbox" aria-checked={t.done} aria-label={`Completa ${t.title}`} onClick={() => toggle(t)}
-          className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ring-2 ${t.done ? 'bg-accent text-accent-ink ring-accent' : 'ring-line'}`}>{t.done ? '✓' : ''}</button>
+          className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ring-2 ${t.done ? 'bg-accent text-accent-ink ring-accent' : 'ring-line'}`}>{t.done ? <Check size={16} strokeWidth={2.5} /> : null}</button>
         <button className="min-w-0 flex-1 text-left" onClick={() => setSheet({ task: t })}>
-          <span className={`block font-semibold ${t.done ? 'text-mute line-through' : ''}`}>{t.title}</span>
+          <span className={`block font-medium ${t.done ? 'text-mute line-through' : ''}`}>{t.title}</span>
           <span className="flex flex-wrap items-center gap-x-2 text-sm text-mute">
             {t.due && <span className={late ? 'font-semibold text-red-600 dark:text-red-400' : ''}>{late ? '⚠ ' : ''}{dueLabel(t.due, today)}</span>}
             {t.assignee && <span>· {name(t.assignee)}</span>}
@@ -93,18 +95,17 @@ export default function Tasks() {
             {t.done && t.done_by && <span>· fatta da {name(t.done_by)}</span>}
           </span>
         </button>
-        {canNudge && <button aria-label={`Sollecita ${t.title}`} title="Sollecita" onClick={() => nudge(t)} className="rounded-full bg-card px-3 py-1.5 text-lg ring-1 ring-line">👆</button>}
+        {canNudge && <button aria-label={`Sollecita ${t.title}`} title="Sollecita" onClick={() => nudge(t)} className="icon-btn-soft !h-10 !w-10 text-accent"><HandMetal size={18} strokeWidth={1.6} /></button>}
       </div>
     )
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between"><h1 className="text-xl font-bold">Attività</h1>
-        <div className="flex gap-2"><button className="btn-soft !px-4 !py-2" onClick={() => setSheet({ cats: true })}>Categorie</button><button className="btn !py-2" onClick={() => setSheet({})}>+ Nuova</button></div></div>
+      <PageHeader eyebrow="Da fare" title="Attività" action={<><button aria-label="Categorie" className="icon-btn-soft" onClick={() => setSheet({ cats: true })}><Tag size={19} strokeWidth={1.6} /></button><button aria-label="Nuova attività" className="icon-btn" onClick={() => setSheet({})}><Plus size={22} /></button></>} />
       <div className="flex gap-2 overflow-x-auto" role="tablist">
         {[['tutte', 'Tutte'], [user.id, 'Mie'], ...(partner ? [[partner.id, `Di ${partner.name}`]] : [])].map(([k, l]) => (
-          <button key={k} role="tab" aria-selected={who === k} onClick={() => setWho(k)} className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold ${who === k ? 'bg-accent text-accent-ink' : 'bg-soft text-mute'}`}>{l}</button>
+          <button key={k} role="tab" aria-selected={who === k} onClick={() => setWho(k)} className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium ${who === k ? 'bg-accent text-accent-ink' : 'bg-card text-mute ring-1 ring-line'}`}>{l}</button>
         ))}
       </div>
       {tasks === null ? <p className="text-mute">Un attimo…</p> : open.length === 0 ? <div className="card text-center text-mute">Tutto fatto! 🎉<br />Niente da fare per ora.</div> : <div className="space-y-2">{open.map((t) => <Item key={t.id} t={t} />)}</div>}

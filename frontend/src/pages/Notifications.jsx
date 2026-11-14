@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { ChevronLeft } from 'lucide-react'
 import { api } from '../api'
+import { PageHeader } from '../components/ui'
 import { useApp } from '../state'
 import { useLive } from '../hooks'
 
@@ -19,10 +21,10 @@ export default function Notifications() {
   useEffect(() => { if (unread) api.post('/notifications/read').then(() => reload()) }, [unread]) // eslint-disable-line
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2"><Link to="/" aria-label="Indietro" className="btn-soft !px-4 !py-2">‹</Link><h1 className="text-xl font-bold">Notifiche</h1></div>
+      <PageHeader eyebrow="Per te" title="Notifiche" action={<Link to="/" aria-label="Indietro" className="icon-btn-soft"><ChevronLeft size={20} /></Link>} />
       {data === null ? <p className="text-mute">Un attimo…</p> : data.items.length === 0 ? <div className="card text-center text-mute">Nessuna notifica, per ora. 🌿</div> : (
         <div className="space-y-2">{data.items.map((n) => (
-          <Link key={n.id} to={n.link || '/'} className={`block rounded-2xl px-4 py-3 ${n.read ? 'bg-soft' : 'bg-accent/15 ring-1 ring-accent/40'}`}>
+          <Link key={n.id} to={n.link || '/'} className={`block rounded-2xl px-4 py-3 ${n.read ? 'bg-card ring-1 ring-line' : 'bg-accent/12 ring-1 ring-accent/40'}`}>
             <div>{n.text}</div><div className="text-xs text-mute">{when(n.created_at)}</div>
           </Link>))}</div>
       )}

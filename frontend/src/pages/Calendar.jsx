@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
+import { Plus, ChevronLeft, ChevronRight, Repeat } from 'lucide-react'
 import { api } from '../api'
+import { PageHeader } from '../components/ui'
 import { useApp } from '../state'
 import { useLive, iso } from '../hooks'
 import Sheet from '../components/Sheet'
@@ -67,13 +69,13 @@ export function EventRow({ e, onClick, showDate }) {
   const [, color] = CATS[e.category] || CATS.noi
   const d = new Date(e.start.slice(0, 10) + 'T12:00:00')
   return (
-    <button onClick={onClick} className="flex w-full items-center gap-3 rounded-2xl bg-soft px-4 py-3 text-left">
+    <button onClick={onClick} className="card flex w-full items-center gap-3 !rounded-2xl !p-4 text-left">
       <span className="h-10 w-1.5 shrink-0 rounded-full" style={{ background: color }} />
       <span className="min-w-0 flex-1">
-        <span className="block truncate font-semibold">{e.type === 'compleanno' ? '🎂 ' : e.type === 'anniversario' ? '💞 ' : ''}{e.title}</span>
+        <span className="block truncate font-medium">{e.type === 'compleanno' ? '🎂 ' : e.type === 'anniversario' ? '💞 ' : ''}{e.title}</span>
         <span className="block truncate text-sm text-mute">{showDate && `${d.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' })} · `}{timeOf(e)}{e.location ? ` · ${e.location}` : ''}</span>
       </span>
-      {e.is_recurring && <span aria-label="Si ripete" className="text-mute">🔁</span>}
+      {e.is_recurring && <Repeat aria-label="Si ripete" size={16} className="text-mute" />}
     </button>
   )
 }
@@ -103,11 +105,8 @@ export default function Calendar() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <button aria-label="Mese precedente" className="btn-soft !px-4" onClick={() => move(-1)}>‹</button>
-        <h1 className="text-xl font-bold capitalize">{MONTHS[m]} {y}</h1>
-        <button aria-label="Mese successivo" className="btn-soft !px-4" onClick={() => move(1)}>›</button>
-      </div>
+      <PageHeader eyebrow="Il nostro tempo" title={<span className="capitalize">{MONTHS[m]} {y}</span>}
+        action={<><button aria-label="Mese precedente" className="icon-btn-soft" onClick={() => move(-1)}><ChevronLeft size={20} /></button><button aria-label="Mese successivo" className="icon-btn-soft" onClick={() => move(1)}><ChevronRight size={20} /></button></>} />
       {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
       <div className="card !p-3">
         <div className="mb-1 grid grid-cols-7 text-center text-xs font-semibold text-mute">{['L', 'M', 'M', 'G', 'V', 'S', 'D'].map((l, i) => <div key={i}>{l}</div>)}</div>
@@ -125,8 +124,8 @@ export default function Calendar() {
         </div>
       </div>
       <div className="flex items-center justify-between">
-        <h2 className="font-bold">{new Date(sel + 'T12:00').toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' })}</h2>
-        <button className="btn !py-2" onClick={() => setSheet({})}>+ Evento</button>
+        <h2 className="display text-2xl">{new Date(sel + 'T12:00').toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' })}</h2>
+        <button aria-label="Nuovo evento" className="icon-btn" onClick={() => setSheet({})}><Plus size={22} /></button>
       </div>
       <div className="space-y-2">
         {dayEvents.length === 0 && <p className="text-mute">Niente in programma per questo giorno.</p>}
@@ -134,7 +133,7 @@ export default function Calendar() {
       </div>
       {monthEvents.length > 0 && (
         <>
-          <h2 className="pt-2 font-bold">Agenda di {MONTHS[m]}</h2>
+          <h2 className="eyebrow pt-2">Agenda di {MONTHS[m]}</h2>
           <div className="space-y-2">{monthEvents.map((e) => <EventRow key={'a' + e.key} e={e} showDate onClick={() => setSheet({ event: e })} />)}</div>
         </>
       )}

@@ -16,7 +16,9 @@ MODULES = {
     "desideri": True,
     "buono_a_sapersi": True,
     "note": True,
+    "viaggi": True,
     "risparmi": True,
+    "spese": True,
     "cassaforte": True,
     "disegno": True,
     "ciclo": False,  # opzionale, disattivato di default

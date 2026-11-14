@@ -1,4 +1,7 @@
-import { Link, NavLink, Navigate, Route, Routes } from 'react-router-dom'
+import { NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { LayoutGrid, Home as HomeIcon } from 'lucide-react'
+import { SECTIONS } from './modules'
+import More from './pages/More'
 import { useApp } from './state'
 import { Spinner } from './components/ui'
 import Auth from './pages/Auth'
@@ -10,21 +13,17 @@ import { ListsPage, ListDetail } from './pages/Lists'
 import Notifications from './pages/Notifications'
 import Trash from './pages/Trash'
 
-const Tab = ({ to, icon, label, badge }) => (
-  <NavLink to={to} end={to === '/'} className={({ isActive }) => `relative flex flex-1 flex-col items-center gap-0.5 py-2 text-xs font-semibold ${isActive ? 'text-accent' : 'text-mute'}`}>
-    <span className="text-2xl leading-none">{icon}</span>{label}
-    {badge > 0 && <span className="absolute right-[22%] top-1 min-w-[1.1rem] rounded-full bg-accent px-1 text-center text-[10px] leading-[1.1rem] text-accent-ink">{badge}</span>}
+const Tab = ({ to, icon: Icon, label, active }) => (
+  <NavLink to={to} end={to === '/'} className={({ isActive }) => `flex flex-1 flex-col items-center gap-0.5 rounded-2xl py-2 text-[11px] font-medium transition ${(active ?? isActive) ? 'bg-accent/15 text-accent' : 'text-mute'}`}>
+    <Icon size={22} strokeWidth={1.6} />{label}
   </NavLink>
 )
-
-// Sezioni attivabili dalle impostazioni: chiave modulo → [percorso, icona, etichetta]
-const SECTIONS = [['calendario', '/calendario', '📅', 'Calendario'], ['attivita', '/attivita', '✅', 'Attività'], ['liste', '/liste', '🛒', 'Liste']]
 
 function Toast() {
   const { toast, closeToast } = useApp()
   if (!toast) return null
   return (
-    <div role="status" className="fixed inset-x-0 bottom-20 z-40 mx-auto flex w-[calc(100%-2rem)] max-w-sm items-center justify-between gap-3 rounded-2xl bg-ink px-4 py-3 text-bg shadow-lg" style={{ marginBottom: 'env(safe-area-inset-bottom)' }}>
+    <div role="status" className="fixed inset-x-0 bottom-24 z-40 mx-auto flex w-[calc(100%-2rem)] max-w-sm items-center justify-between gap-3 rounded-2xl bg-ink px-4 py-3 text-bg shadow-lg" style={{ marginBottom: 'env(safe-area-inset-bottom)' }}>
       <span>{toast.text}</span>
       {toast.action && <button className="font-bold underline" onClick={async () => { closeToast(); await toast.action.run() }}>{toast.action.label}</button>}
     </div>
@@ -33,13 +32,15 @@ function Toast() {
 
 export default function App() {
   const { user, home, loading, couple } = useApp()
+  const { pathname } = useLocation()
   if (loading) return <Spinner />
   if (!user || !home) return <Auth />
   const on = (k) => couple.modules?.[k] !== false
-  const sections = SECTIONS.filter(([k]) => on(k))
+  const navItems = SECTIONS.filter((x) => x.nav && on(x.key))
+  const inNav = pathname === '/' || navItems.some((x) => pathname.startsWith(x.path))
   return (
     <div className="mx-auto min-h-screen max-w-md">
-      <main className="px-4 pb-28 pt-[max(1.25rem,env(safe-area-inset-top))]">
+      <main className="px-4 pb-32 pt-[max(1.25rem,env(safe-area-inset-top))]">
         <Routes>
           <Route path="/" element={<Home />} />
           {on('calendario') && <Route path="/calendario" element={<Calendar />} />}
@@ -48,16 +49,17 @@ export default function App() {
           {on('liste') && <Route path="/liste/:id" element={<ListDetail />} />}
           <Route path="/notifiche" element={<Notifications />} />
           <Route path="/cestino" element={<Trash />} />
+          <Route path="/altro" element={<More />} />
           <Route path="/impostazioni" element={<Settings />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
       <Toast />
-      <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-card/90 backdrop-blur" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        <div className="mx-auto flex max-w-md">
-          <Tab to="/" icon="🏠" label="Home" badge={home.unread_notifications} />
-          {sections.map(([, to, icon, label]) => <Tab key={to} to={to} icon={icon} label={label} />)}
-          <Tab to="/impostazioni" icon="⚙️" label="Impostazioni" />
+      <nav className="fixed inset-x-0 bottom-0 z-10 px-3" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
+        <div className="mx-auto flex max-w-md gap-1 rounded-3xl bg-card/95 p-1.5 shadow-lg ring-1 ring-line backdrop-blur">
+          <Tab to="/" icon={HomeIcon} label="Home" />
+          {navItems.map((x) => <Tab key={x.path} to={x.path} icon={x.icon} label={x.label.split(' ')[0]} />)}
+          <Tab to="/altro" icon={LayoutGrid} label="Altro" active={!inNav} />
         </div>
       </nav>
     </div>

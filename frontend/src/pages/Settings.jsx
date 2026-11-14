@@ -1,14 +1,13 @@
-import { Link } from 'react-router-dom'
 import { useRef, useState } from 'react'
 import { useApp } from '../state'
 import { api } from '../api'
-import { Avatar, Row, Toggle } from '../components/ui'
+import { Avatar, PageHeader, Row, Toggle } from '../components/ui'
 import { downloadBlob, resizeImage } from '../util'
 
 const MODULES = {
   calendario: 'Calendario', attivita: 'Attività', liste: 'Liste', domanda: 'Domanda del giorno',
   decidere: 'Decidere insieme', fare_insieme: 'Da fare insieme', desideri: 'Desideri e radar regali',
-  buono_a_sapersi: 'Buono a sapersi', note: 'Note, capsule e storie', risparmi: 'Risparmi',
+  buono_a_sapersi: 'Buono a sapersi', note: 'Note, capsule e storie', viaggi: 'Viaggi', risparmi: 'Risparmi', spese: 'Spese comuni',
   cassaforte: 'Cassaforte', disegno: 'Disegno condiviso', ciclo: 'Ciclo (privato)', anno: 'Il nostro anno',
 }
 const NOTIFS = {
@@ -20,7 +19,7 @@ const NOTIFS = {
 function Section({ title, children }) {
   return (
     <section className="space-y-1">
-      <h2 className="px-2 text-sm font-semibold uppercase tracking-wide text-mute">{title}</h2>
+      <h2 className="eyebrow px-2">{title}</h2>
       <div className="card divide-y divide-line !py-2">{children}</div>
     </section>
   )
@@ -57,7 +56,7 @@ export default function Settings() {
 
   return (
     <div className="space-y-6">
-      <h1 className="px-2 text-2xl font-bold">Impostazioni</h1>
+      <PageHeader eyebrow="Per voi" title="Impostazioni" />
       {(msg || err) && (
         <p role="status" className={`rounded-2xl px-4 py-3 text-sm ${err ? 'bg-red-500/10 text-red-600 dark:text-red-400' : 'bg-accent/10 text-accent'}`}>{err || msg}</p>
       )}
@@ -103,10 +102,6 @@ export default function Settings() {
               onChange={run((v) => saveProfile({ notifications: { types: { [k]: v } } }))} />
           </Row>
         ))}
-      </Section>
-
-      <Section title="Cestino">
-        <Row title="Eliminati di recente" hint="Recupera eventi, attività e liste entro 7 giorni"><Link to="/cestino" className="btn-soft !py-2">Apri</Link></Row>
       </Section>
 
       <Section title="Sezioni dell'app">
