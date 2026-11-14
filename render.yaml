@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: noidue-api
+    runtime: python
+    rootDir: backend
+    plan: free            # cambia in "starter" (7 $/mese) per evitare la pausa dopo 15 minuti
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: MONGO_URL
+        sync: false       # lo inserisci tu nel pannello (stringa di MongoDB Atlas)
+      - key: DB_NAME
+        value: noidue
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false       # l'indirizzo del frontend su Vercel
+      - key: MAX_USERS
+        value: "2"

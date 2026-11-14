@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 251 246 240;
+  --card: 255 255 255;
+  --soft: 245 236 227;
+  --ink: 43 33 28;
+  --mute: 124 108 98;
+  --line: 233 222 212;
+  --accent: 194 96 63; /* terracotta */
+  --accent-ink: 255 255 255;
+}
+.dark {
+  --bg: 30 24 21;
+  --card: 43 35 31;
+  --soft: 54 45 40;
+  --ink: 245 237 230;
+  --mute: 177 161 150;
+  --line: 68 57 51;
+  --accent: 214 125 92;
+  --accent-ink: 30 24 21;
+}
+
+html, body, #root { min-height: 100%; }
+body {
+  @apply bg-bg font-sans text-ink antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+input, textarea, select { font-size: 16px; } /* niente zoom automatico su iPhone */
+
+@layer components {
+  .card { @apply rounded-3xl bg-card p-5 shadow-sm ring-1 ring-line; }
+  .btn { @apply inline-flex items-center justify-center rounded-2xl bg-accent px-5 py-3 font-semibold text-accent-ink transition active:scale-[.98] disabled:opacity-50; }
+  .btn-soft { @apply inline-flex items-center justify-center rounded-2xl bg-soft px-5 py-3 font-semibold text-ink transition active:scale-[.98] disabled:opacity-50; }
+  .btn-danger { @apply inline-flex items-center justify-center rounded-2xl px-5 py-3 font-semibold text-red-600 ring-1 ring-red-300 transition active:scale-[.98] dark:text-red-400 dark:ring-red-500/40; }
+  .input { @apply w-full rounded-2xl border-0 bg-soft px-4 py-3 text-ink ring-1 ring-line placeholder:text-mute focus:outline-none focus:ring-2 focus:ring-accent; }
+  .label { @apply mb-1.5 block text-sm font-medium text-mute; }
+}
